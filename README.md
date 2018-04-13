@@ -1,1 +1,3 @@
 # runtime-systems
+## Project Description
+Try out and test [StackImpact](https://stackimpact.com/blog/profiling-go-applications-in-production/). Find 5 go programs in open source and turn them into a benchmark suite. Run 2 inputs per program (one short running, one longer runnning) and generate data for each. Reverse engineer stackimpact's server side (dashboard) so that you can run it locally and not use/login to their servers. Make the two look as similar as possible.
