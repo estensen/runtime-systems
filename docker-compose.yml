@@ -1,18 +1,9 @@
 version: '3.5'
 
 services:
-  backend:
-    build: ./backend
-    volumes:
-      - ./backend:/go/src/backend-api
-    ports:
-      - 5002:80
-
   frontend:
     build: ./frontend
     volumes:
       - ./frontend:/usr/src/app
     ports:
       - 3000:3000
-    depends_on:
-      - backend
