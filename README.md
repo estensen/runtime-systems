@@ -37,7 +37,7 @@ func main() {
 }
 ```
 
-## pprof
+## [pprof](https://github.com/google/pprof)
 If your program runs a webserver you can enable debugging over http.
 ```
 go tool pprof /path/to/binary /path/to/profile
@@ -49,3 +49,9 @@ The more times a function appears in the profile, the more time that code path i
 Memory profiling records the stack trace when a heap allocation is made.
 Memory profiling like CPU is sample based. By default memory profiling samples 1 in every 1000 allocation.
 Because memory profiling is sample based and tracks allocations, not use, it's difficult to determine the app's overall memory usage.
+
+## perf
+Frame pointers to understand the Go call stack.
+
+## Visualization Ideas
+### [Flame Graph](https://github.com/uber/go-torch)
