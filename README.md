@@ -15,3 +15,10 @@ To look at the performance of these 5 programs, we want to reverse engineer [Sta
 
 ## Plan
 The first two-three weeks will be used to look more into StackImpact, benchmarking, and finding our 5 programs. Then we are going to start benchmarking our programs and trying to visualize this by reverse engineering some of StackImpact's features.
+
+## Profiling do's and don't's
+Before you profile, you must have a stable environment to get repeatable results.
+* The machine must be idle - don't profile on shared hardware or browse the web while waiting for a long benchmark to run.
+* Watch out for power savings and thermal scaling.
+* Avoid virtual machines and shared cloud hosting; they have too much noise for consistent measurements.
+* Have a before and after sample and run them multiple times to get consistent results.
