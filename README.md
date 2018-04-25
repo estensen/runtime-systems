@@ -39,6 +39,9 @@ func main() {
 
 ## pprof
 If your program runs a webserver you can enable debugging over http.
+```
+go tool pprof /path/to/binary /path/to/profile
+```
 ### CPU
 When CPU profiling is enabled, the runtime will interrupt itself every 10ms and record the stack trace of the currently running goroutines.
 The more times a function appears in the profile, the more time that code path is taking as a percentage of the total runtime.
