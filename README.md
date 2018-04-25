@@ -24,7 +24,21 @@ Before you profile, you must have a stable environment to get repeatable results
 * Have a before and after sample and run them multiple times to get consistent results.
 * Run one profile at a time, so you measure the program, and not yourself.
 
+## Profile a function
+Use the testing package
+
+## Profile whole programs
+```
+import "github.com/pkg/profile"
+
+func main() {
+    defer profile.Start().Stop()
+    ...
+}
+```
+
 ## pprof
+If your program runs a webserver you can enable debugging over http.
 ### CPU
 When CPU profiling is enabled, the runtime will interrupt itself every 10ms and record the stack trace of the currently running goroutines.
 The more times a function appears in the profile, the more time that code path is taking as a percentage of the total runtime.
