@@ -22,3 +22,13 @@ Before you profile, you must have a stable environment to get repeatable results
 * Watch out for power savings and thermal scaling.
 * Avoid virtual machines and shared cloud hosting; they have too much noise for consistent measurements.
 * Have a before and after sample and run them multiple times to get consistent results.
+* Run one profile at a time, so you measure the program, and not yourself.
+
+## pprof
+### CPU
+When CPU profiling is enabled, the runtime will interrupt itself every 10ms and record the stack trace of the currently running goroutines.
+The more times a function appears in the profile, the more time that code path is taking as a percentage of the total runtime.
+### Memory
+Memory profiling records the stack trace when a heap allocation is made.
+Memory profiling like CPU is sample based. By default memory profiling samples 1 in every 1000 allocation.
+Because memory profiling is sample based and tracks allocations, not use, it's difficult to determine the app's overall memory usage.
