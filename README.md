@@ -1,4 +1,4 @@
-# runtime-systems
+# runtime-systems &middot; [![Maintainability](https://api.codeclimate.com/v1/badges/ca4d743c426d04643da2/maintainability)](https://codeclimate.com/github/estensen/runtime-systems/maintainability)
 
 ## Getting started
 The project requires go, docker and docker-compose.
