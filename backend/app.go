@@ -10,15 +10,21 @@ import (
 )
 
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	payload := map[string]string{"API-type": "This is a RESTful API"}
+	payload := map[string]string{"apiType": "This is a RESTful API"}
 	response, err := json.Marshal(payload)
 	if err != nil {
 		panic(err)
 	}
 
+	enableCors(&w)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(response)
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
 
 func main() {
