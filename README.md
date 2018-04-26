@@ -6,7 +6,7 @@ The project requires go, docker and docker-compose.
 ## Run
 Start the app by running:
 ```
-export APP_ENV=dev
+$ export APP_ENV=dev
 $ docker-compose up -d
 ```
 
