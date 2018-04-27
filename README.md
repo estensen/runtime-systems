@@ -1,4 +1,4 @@
-# runtime-systems &middot; [![Maintainability](https://api.codeclimate.com/v1/badges/ca4d743c426d04643da2/maintainability)](https://codeclimate.com/github/estensen/runtime-systems/maintainability)
+# runtime-systems &middot; [![Maintainability](https://api.codeclimate.com/v1/badges/ca4d743c426d04643da2/maintainability)](https://codeclimate.com/github/estensen/runtime-systems/maintainability) [![Go Report Card](https://goreportcard.com/badge/github.com/estensen/runtime-systems)](https://goreportcard.com/report/github.com/estensen/runtime-systems)
 
 ## Getting started
 The project requires go, docker and docker-compose.
