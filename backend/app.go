@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +16,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func getCPU(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func getReportsCPU(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	dirname := "reports"
 
 	f, err := os.Open(dirname)
@@ -33,10 +35,27 @@ func getCPU(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		filenames = append(filenames, file.Name())
 	}
 
-	response := map[string][]string{"filenames": filenames}
+	payload := map[string][]string{"filenames": filenames}
 
-	respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, payload)
+}
 
+// Read file and return file length
+func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	filename := "reports/" + ps.ByName("filename")
+	file, err := ioutil.ReadFile(filename)
+	if err != nil {
+		respondWithJSON(w, http.StatusBadRequest, "Coul not read report file")
+	}
+
+	fmt.Printf("\nFilename: %s", filename)
+	fmt.Printf("\nFile: %s", file)
+	fmt.Printf("\nLength: %d bytes", len(file))
+
+	reportLength := len(file)
+
+	payload := map[string]int{"reportLength": reportLength}
+	respondWithJSON(w, http.StatusOK, payload)
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
@@ -59,7 +78,8 @@ func enableCors(w *http.ResponseWriter) {
 func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
-	router.GET("/cpu", getCPU)
+	router.GET("/cpu", getReportsCPU)
+	router.GET("/cpu/:filename", getReportCPU)
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {
