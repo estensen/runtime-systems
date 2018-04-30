@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -42,20 +41,22 @@ func getReportsCPU(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 
 // Read file and return file length
 func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	filename := "reports/" + ps.ByName("filename")
-	file, err := ioutil.ReadFile(filename)
-	if err != nil {
-		respondWithJSON(w, http.StatusBadRequest, "Coul not read report file")
+	dirname := "reports/"
+	filename := dirname + ps.ByName("filename")
+
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		respondWithJSON(w, http.StatusNotFound, "File not found")
+	} else {
+		file, err := ioutil.ReadFile(filename)
+		if err != nil {
+			respondWithJSON(w, http.StatusBadRequest, "Could not read report file")
+		}
+
+		reportLength := len(file)
+
+		payload := map[string]int{"reportLength": reportLength}
+		respondWithJSON(w, http.StatusOK, payload)
 	}
-
-	fmt.Printf("\nFilename: %s", filename)
-	fmt.Printf("\nFile: %s", file)
-	fmt.Printf("\nLength: %d bytes", len(file))
-
-	reportLength := len(file)
-
-	payload := map[string]int{"reportLength": reportLength}
-	respondWithJSON(w, http.StatusOK, payload)
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
