@@ -20,14 +20,14 @@ function Header(props) {
   const { classes } = props;
   return (
     <div className={classes.root}>
-      <AppBar position="static">
+      <AppBar position='static'>
         <Toolbar>
-          <Typography variant="title" color="inherit" className={classes.logo}>
+          <Typography variant='title' color='inherit' className={classes.logo}>
             GoProfile
           </Typography>
-          <Button color="inherit" component={Link} to='/' >Home</Button>
-          <Button color="inherit" component={Link} to='/cpu'>CPU</Button>
-          <Button color="inherit" component={Link} to='/memory'>Memory</Button>
+          <Button color='inherit' component={Link} to='/' >Home</Button>
+          <Button color='inherit' component={Link} to='/cpu'>CPU</Button>
+          <Button color='inherit' component={Link} to='/memory'>Memory</Button>
         </Toolbar>
       </AppBar>
     </div>

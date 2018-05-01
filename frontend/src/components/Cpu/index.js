@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 
 const API = 'http://localhost:8080/cpu'
 
@@ -24,7 +25,10 @@ class Cpu extends Component {
   render() {
     const { filenames } = this.state
     const listFilenames = (filenames.length > 1)
-      ? filenames.map(filename => <li key={filename}>{filename}</li>)
+      ? filenames.map(filename =>
+        <li key={filename}>
+        <Link to={`cpu/${filename}`}>{filename}</Link>
+        </li>)
       : <li>No files</li>
 
     return (
