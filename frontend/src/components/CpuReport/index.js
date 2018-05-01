@@ -23,12 +23,12 @@ class CpuReport extends Component {
   }
 
   render() {
-    const { match: { params } } = this.props
+    const { match: { params: { filename } } } = this.props
     const { reportLength } = this.state
 
     return (
       <div>
-        <h1>Length of report {params.filename}</h1>
+        <h1>Length of report {filename}</h1>
         {reportLength}
       </div>
     )
