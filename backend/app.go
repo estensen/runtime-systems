@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	pprof "net/http/pprof"
 	"os"
 
 	"github.com/julienschmidt/httprouter"
@@ -82,15 +81,6 @@ func main() {
 	router.GET("/", indexHandler)
 	router.GET("/cpu", getReportsCPU)
 	router.GET("/cpu/:filename", getReportCPU)
-	router.HandlerFunc(http.MethodGet, "/debug/pprof/", pprof.Index)
-	router.HandlerFunc(http.MethodGet, "/debug/pprof/cmdline", pprof.Cmdline)
-	router.HandlerFunc(http.MethodGet, "/debug/pprof/profile", pprof.Profile)
-	router.HandlerFunc(http.MethodGet, "/debug/pprof/symbol", pprof.Symbol)
-	router.HandlerFunc(http.MethodGet, "/debug/pprof/trace", pprof.Trace)
-	router.Handler(http.MethodGet, "/debug/pprof/goroutine", pprof.Handler("goroutine"))
-	router.Handler(http.MethodGet, "/debug/pprof/heap", pprof.Handler("heap"))
-	router.Handler(http.MethodGet, "/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
-	router.Handler(http.MethodGet, "/debug/pprof/block", pprof.Handler("block"))
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {
