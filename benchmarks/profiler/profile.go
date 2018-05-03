@@ -1,14 +1,19 @@
-package main
+package profiler
 
 import (
-	_ "net/http/pprof"
+	"fmt"
 
 	"github.com/estensen/runtime-systems/benchmarks/fibonacci"
 	"github.com/pkg/profile"
 )
 
-func main() {
-	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+//Profiler running from main
+func Profiler() {
+	fmt.Println("Running Fibonacci Profiler")
+	runFibonacciProfiler()
+}
 
+func runFibonacciProfiler() {
+	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
 	fibonacci.Fibonacci(1000000)
 }
