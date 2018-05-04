@@ -3,17 +3,24 @@ package profiler
 import (
 	"fmt"
 
-	"github.com/estensen/runtime-systems/benchmarks/fibonacci"
+	"github.com/estensen/runtime-systems/benchmarks/sort"
+
 	"github.com/pkg/profile"
 )
 
 //Profiler running from main
-func Profiler() {
-	fmt.Println("Running Fibonacci Profiler")
-	runFibonacciProfiler()
+func Profiler(packageName string) {
+	runPackage(packageName)
 }
 
-func runFibonacciProfiler() {
+func runPackage(packageName string) {
+	//checkPackage
+	//checkPackageTest
 	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
-	fibonacci.Fibonacci(1000000)
+	switch packageName {
+	case "sort":
+		sort.Sort()
+	default:
+		fmt.Println("Package not found")
+	}
 }
