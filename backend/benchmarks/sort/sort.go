@@ -12,5 +12,5 @@ func Sort() {
 		numberList = append(numberList, rand.Intn(1000))
 	}
 	sort.Ints(numberList)
-	fmt.Println(numberList)
+	fmt.Println("sorted")
 }
