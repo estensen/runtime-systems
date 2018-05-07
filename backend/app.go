@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/estensen/runtime-systems/backend/benchmarks/profiler"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -59,6 +61,34 @@ func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 }
 
+func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	packageName := ps.ByName("package")
+	fmt.Println(packageName)
+
+	profiler.Profiler(packageName)
+	/*
+		run terminal-commando go tool pprof to save in textfile in diagrams directory
+		if err := exec.Command("go", "tool", "pprof", "-pdf", "cpu.pprof").Run(); err != nil {
+			respondWithJSON(w, http.StatusNotFound, "Unable to run command line")
+		}
+			if err := exec.Command("exit").Run(); err != nil {
+				respondWithJSON(w, http.StatusNotFound, "Unable to close command pprof program")
+			}
+	*/
+
+	dirname := "diagrams/"
+	filename := dirname + packageName + "Example.png"
+
+	pdf, err := ioutil.ReadFile(filename)
+	if err != nil {
+		w.WriteHeader(404)
+		w.Write([]byte("Could not read file - " + http.StatusText(404)))
+	} else {
+		w.Write(pdf)
+	}
+
+}
+
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	if err != nil {
@@ -80,7 +110,8 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
 	router.GET("/cpu", getReportsCPU)
-	router.GET("/cpu/:filename", getReportCPU)
+	router.GET("/cpu/reports/:filename", getReportCPU)
+	router.GET("/cpu/diagram/:package", getCPUdiagram)
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {
