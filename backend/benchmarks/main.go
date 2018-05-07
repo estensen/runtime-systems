@@ -20,7 +20,6 @@ func main() {
 }
 
 func cpuTextfileToJSON(name string) {
-	//To do - trim text and convert to preferred JSON structure
 	filename := name + ".txt"
 
 	file, err := os.Open(filename)
@@ -31,6 +30,7 @@ func cpuTextfileToJSON(name string) {
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
+		//To do - trim text and convert to preferred JSON structure
 		fmt.Println(scanner.Text())
 	}
 
