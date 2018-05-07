@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/estensen/runtime-systems/benchmarks/profiler"
+	"github.com/estensen/runtime-systems/backend/benchmarks/profiler"
 )
 
 func main() {
@@ -20,6 +20,7 @@ func main() {
 }
 
 func cpuTextfileToJSON(name string) {
+	//To do - trim text and convert to preferred JSON structure
 	filename := name + ".txt"
 
 	file, err := os.Open(filename)
