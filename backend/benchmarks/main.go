@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"log"
 	"os"
+	"os/exec"
 
 	"github.com/estensen/runtime-systems/backend/benchmarks/profiler"
 )
@@ -19,23 +17,23 @@ func main() {
 	}
 }
 
-func cpuTextfileToJSON(name string) {
-	filename := name + ".txt"
+func cpuTextfileToJSON(packageName string) {
+	filename := packageName + ".txt"
 
-	file, err := os.Open(filename)
+	//create textfile to save terminal output in. File is created en reports directory
+	file, err := os.Create("../reports/" + filename)
 	if err != nil {
-		panic("Could not open " + filename)
+		panic("Could not create " + filename)
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		//To do - trim text and convert to preferred JSON structure
-		fmt.Println(scanner.Text())
+	//run command to create text from pprof
+	pproftext := exec.Command("go", "tool", "pprof", "-text", "cpu.pprof")
+	textOut, err := pproftext.Output()
+	if err != nil {
+		panic(err)
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
+	//save command output in textfile
+	file.Write(textOut)
 }
