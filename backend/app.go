@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 
 	"github.com/estensen/runtime-systems/backend/benchmarks/profiler"
 	"github.com/julienschmidt/httprouter"
@@ -61,31 +61,33 @@ func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 }
 
+// When going to localhost:8080/cpu/diagram/:package, this method will run our profiler with the given package name
+// then create a PDF diagram with the given cpu.pprof file and show this on the webpage.
 func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("package")
-	fmt.Println(packageName)
-
 	profiler.Profiler(packageName)
-	/*
-		run terminal-commando go tool pprof to save in textfile in diagrams directory
-		if err := exec.Command("go", "tool", "pprof", "-pdf", "cpu.pprof").Run(); err != nil {
-			respondWithJSON(w, http.StatusNotFound, "Unable to run command line")
-		}
-			if err := exec.Command("exit").Run(); err != nil {
-				respondWithJSON(w, http.StatusNotFound, "Unable to close command pprof program")
-			}
-	*/
 
-	dirname := "diagrams/"
-	filename := dirname + packageName + "Example.png"
+	filename := packageName + ".pdf"
 
-	pdf, err := ioutil.ReadFile(filename)
+	//create textfile to save terminal output in. File is created en reports directory
+	file, err := os.Create("diagrams/" + filename)
 	if err != nil {
-		w.WriteHeader(404)
-		w.Write([]byte("Could not read file - " + http.StatusText(404)))
-	} else {
-		w.Write(pdf)
+		panic("Could not create " + filename)
 	}
+	defer file.Close()
+
+	//run command to create text from pprof
+	pprofPDF := exec.Command("go", "tool", "pprof", "-pdf", "cpu.pprof")
+	pdf, err := pprofPDF.Output()
+	if err != nil {
+		panic(err)
+	}
+
+	//save command output in textfile
+	file.Write(pdf)
+
+	//Write PDF to site
+	w.Write(pdf)
 
 }
 
