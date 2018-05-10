@@ -67,7 +67,7 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	packageName := ps.ByName("package")
 	profiler.Profiler(packageName)
 
-	filename := packageName + ".pdf"
+	filename := packageName + ".png"
 
 	//create textfile to save terminal output in. File is created en reports directory
 	file, err := os.Create("diagrams/" + filename)
@@ -77,7 +77,7 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	defer file.Close()
 
 	//run command to create text from pprof
-	pprofPDF := exec.Command("go", "tool", "pprof", "-pdf", "cpu.pprof")
+	pprofPDF := exec.Command("go", "tool", "pprof", "-png", "cpu.pprof")
 	pdf, err := pprofPDF.Output()
 	if err != nil {
 		panic(err)
