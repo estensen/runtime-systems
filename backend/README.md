@@ -15,18 +15,26 @@ $ docker run -i -t -p 8080:8080 [image id]
 
 To run terminal commando from program:
 Create a file to save the output in by writing:
-$   file, err := os.Create(filename)
-$	if err != nil {
-$		panic("Could not create " + filename)
-$	}
-$	defer file.Close()
+```
+file, err := os.Create(filename)
+if err != nil {
+    panic("Could not create " + filename)
+}
+defer file.Close()
+```
 
 Then run the commando and save that commando in a variable:
-$	commando := exec.Command("go", "tool", "pprof", "-text", "cpu.pprof")
-$	commandoOutput, err := commando.Output()
-$	if err != nil {
-$		panic(err)
-$	}
+```
+
+commando := exec.Command("go", "tool", "pprof", "-text", "cpu.pprof")
+commandoOutput, err := commando.Output()
+if err != nil {
+    panic(err)
+}
+```
+
 
 Then save the commandoOutput in your textfile
-$	file.Write(textOut)
+```
+file.Write(textOut)
+```
