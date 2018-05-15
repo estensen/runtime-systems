@@ -61,7 +61,7 @@ func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	}
 }
 
-// When going to localhost:8080/cpu/diagram/:package, this method will run our profiler with the given package name
+// This method will run our profiler with the given package name
 // then create a PDF diagram with the given cpu.pprof file and show this on the webpage.
 func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("package")
@@ -77,17 +77,14 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	defer file.Close()
 
 	//run command to create text from pprof
-	pprofPDF := exec.Command("go", "tool", "pprof", "-png", "cpu.pprof")
-	pdf, err := pprofPDF.Output()
+	pprofPNG := exec.Command("go", "tool", "pprof", "-png", "cpu.pprof")
+	png, err := pprofPNG.Output()
 	if err != nil {
 		panic(err)
 	}
 
-	//save command output in textfile
-	file.Write(pdf)
-
-	//Write PDF to site
-	w.Write(pdf)
+	file.Write(png)
+	w.Write(png)
 
 }
 
