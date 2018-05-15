@@ -17,26 +17,26 @@ func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func getReportsCPU(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	dirname := "reports"
+func getPrograms(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	dirname := "benchmarks/programs"
 
 	f, err := os.Open(dirname)
 	if err != nil {
-		respondWithJSON(w, http.StatusBadRequest, "Could not open report files")
+		respondWithJSON(w, http.StatusBadRequest, "Could not open program files")
 	}
 	files, err := f.Readdir(-1)
 	f.Close()
 	if err != nil {
-		respondWithJSON(w, http.StatusBadRequest, "Could not read report files")
+		respondWithJSON(w, http.StatusBadRequest, "Could not read program files")
 	}
 
-	var filenames []string
+	var programs []string
 
-	for _, file := range files {
-		filenames = append(filenames, file.Name())
+	for _, program := range files {
+		programs = append(programs, program.Name())
 	}
 
-	payload := map[string][]string{"filenames": filenames}
+	payload := map[string][]string{"programs": programs}
 
 	respondWithJSON(w, http.StatusOK, payload)
 }
@@ -84,8 +84,7 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	}
 
 	file.Write(png)
-	w.Write(png)
-
+	respondWithPNG(w, http.StatusOK, png)
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
@@ -101,6 +100,14 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(response)
 }
 
+func respondWithPNG(w http.ResponseWriter, code int, payload []byte) {
+	enableCors(&w)
+
+	w.Header().Set("Content-Type", "image/png")
+	w.WriteHeader(code)
+	w.Write(payload)
+}
+
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }
@@ -108,7 +115,7 @@ func enableCors(w *http.ResponseWriter) {
 func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
-	router.GET("/cpu", getReportsCPU)
+	router.GET("/cpu", getPrograms)
 	router.GET("/cpu/reports/:filename", getReportCPU)
 	router.GET("/cpu/diagram/:package", getCPUdiagram)
 
