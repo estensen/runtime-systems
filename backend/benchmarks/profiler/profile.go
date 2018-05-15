@@ -3,7 +3,7 @@ package profiler
 import (
 	"fmt"
 
-	"github.com/estensen/runtime-systems/backend/benchmarks/sort"
+	"github.com/estensen/runtime-systems/backend/benchmarks/programs/sort"
 	"github.com/pkg/profile"
 )
 
