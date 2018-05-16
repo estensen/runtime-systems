@@ -38,21 +38,22 @@ class CpuGraph extends Component {
     }
   }
 
+  
   componentDidMount() {    
     
     fetch(API)
-      .then(response => {
-        if (response.ok) {
-          response.json()
-          .then(jsondata => this.setState({ labels: jsondata}))
-        }
-      })
+    .then(response => {
+      if (response.ok) {
+        response.json()
+        .then(jsondata => this.updateData(jsondata[0], jsondata[1]))
+      }
+    })
   }
-
-  updateGraphData(label, cpuPercent) {
-    this.state.labels.push(label)
-    this.state.datasets[0].data.push(cpuPercent)
-    console.log(label, cpuPercent)
+  
+  updateData(label, data){
+    //this.setState(this.state.labels.push(label))
+    this.setState({labels: label})
+    this.setState({datasets: [{ ...this.state.datasets }], data: data})
   }
 
   render() {
