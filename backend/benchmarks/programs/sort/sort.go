@@ -8,7 +8,7 @@ import (
 
 func Sort() {
 	numberList := []int{}
-	for n := 0; n < 10000000000; n++ {
+	for n := 0; n < 10000000; n++ {
 		numberList = append(numberList, rand.Intn(1000))
 	}
 	sort.Ints(numberList)

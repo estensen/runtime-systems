@@ -88,24 +88,13 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func getLiveData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	enableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	packageName := ps.ByName("package")
-	func() {
+	cpuStats := profiler.CPUPercent()
+	respondWithJSON(w, http.StatusOK, cpuStats)
 
-		//cpuStats := profiler.CPUPercent()
-		// cpuJSON, err := json.Marshal(cpuStats)
-		cpuJSON, err := json.Marshal(map[string]string{"yo": "lol"})
-		if err != nil {
-			panic(err)
-		}
-		defer w.Write(cpuJSON)
-		//timer := time.NewTimer(10 * time.Millisecond)
-		// <-timer.C
-
+	go func() {
+		profiler.Profiler(packageName)
 	}()
-	profiler.Profiler(packageName)
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

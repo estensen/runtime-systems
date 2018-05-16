@@ -44,7 +44,7 @@ class CpuGraph extends Component {
       .then(response => {
         if (response.ok) {
           response.json()
-          .then(jsondata => this.setState({ jsondata: [...jsondata]}))
+          .then(jsondata => this.setState({ labels: jsondata}))
         }
       })
   }
