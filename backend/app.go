@@ -89,12 +89,12 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 
 func getLiveData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("package")
-	cpuStats := profiler.CPUPercent()
-	respondWithJSON(w, http.StatusOK, cpuStats)
-
 	go func() {
 		profiler.Profiler(packageName)
 	}()
+	cpuStats := profiler.CPUPercent()
+	respondWithJSON(w, http.StatusOK, cpuStats)
+
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
