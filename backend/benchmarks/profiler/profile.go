@@ -2,7 +2,7 @@ package profiler
 
 import (
 	"fmt"
-	"os"
+	"strconv"
 	"time"
 
 	"github.com/estensen/runtime-systems/backend/benchmarks/programs/sort"
@@ -18,7 +18,7 @@ func Profiler(packageName string) {
 func runPackage(packageName string) {
 	//checkPackage
 	//checkPackageTest
-	go CPUPercent()
+	//go CPUPercent()
 	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
 	switch packageName {
 	case "sort":
@@ -28,22 +28,34 @@ func runPackage(packageName string) {
 	}
 }
 
-func CPUPercent() {
-	filename := "cpupercent.csv"
-
-	c, _ := cpu.Percent(500*time.Millisecond, false)
-
+func CPUPercent() []string {
+	c, _ := cpu.Percent(5*time.Millisecond, false)
 	t := time.Now()
 	now := t.Format("2006-01-02 15:04:05")
+	line := []string{now, strconv.FormatFloat(c[0], 'f', 2, 64)} // Convert c from float64 to string
+	return line
 
-	// Write file as <timestamp>,<size>,<board>
-	line := []string{now, c} // Convert c from float64 to string
+	/*
+		filename := "cpupercent.csv"
 
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0660)
-	if err != nil {
-		panic("could not open csv file")
-	}
+		c, _ := cpu.Percent(10*time.Millisecond, false)
+		t := time.Now()
+		now := t.Format("2006-01-02 15:04:05")
 
-	defer file.Close()
+		// Write file as <timestamp>,<size>,<board>
+		line := []string{now, strconv.FormatFloat(c[0], 'f', 2, 64)} // Convert c from float64 to string
 
+		file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0660)
+		if err != nil {
+			panic("could not open csv file")
+		}
+
+		defer file.Close()
+
+		json, err = json.Marshal(line)
+		if err != nil {
+			panic(err)
+		}
+
+		file.Write(json)*/
 }

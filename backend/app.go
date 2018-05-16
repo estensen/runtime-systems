@@ -87,6 +87,27 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	respondWithPNG(w, http.StatusOK, png)
 }
 
+func getLiveData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	enableCors(&w)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	packageName := ps.ByName("package")
+	func() {
+
+		//cpuStats := profiler.CPUPercent()
+		// cpuJSON, err := json.Marshal(cpuStats)
+		cpuJSON, err := json.Marshal(map[string]string{"yo": "lol"})
+		if err != nil {
+			panic(err)
+		}
+		defer w.Write(cpuJSON)
+		//timer := time.NewTimer(10 * time.Millisecond)
+		// <-timer.C
+
+	}()
+	profiler.Profiler(packageName)
+}
+
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	if err != nil {
@@ -118,6 +139,7 @@ func main() {
 	router.GET("/cpu", getPrograms)
 	router.GET("/cpu/reports/:filename", getReportCPU)
 	router.GET("/cpu/diagram/:package", getCPUdiagram)
+	router.GET("/cpu/live/:package", getLiveData)
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {
