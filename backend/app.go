@@ -2,23 +2,27 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/estensen/runtime-systems/backend/benchmarks/profiler"
 	"github.com/julienschmidt/httprouter"
 )
 
+/*
 type point struct {
 	Time    string
 	Percent string
-}
+}*/
 
-var graphPoints []point
+var graphPoints = make(map[string][]string)
 var profiling = false
+var profilingDoneChannel = make(chan bool, 1)
 
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	payload := map[string]string{"apiType": "This is a RESTful API"}
@@ -73,7 +77,7 @@ func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 // then create a PDF diagram with the given cpu.pprof file and show this on the webpage.
 func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("package")
-	profiler.Profiler(packageName)
+	profiler.Profiler(packageName, profilingDoneChannel)
 
 	filename := packageName + ".png"
 
@@ -96,18 +100,44 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func getLiveData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	enableCors(&w)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
 	packageName := ps.ByName("package")
+	profilingisDone := false
+
 	if !profiling {
 		profiling = true
 		go func() {
-			profiler.Profiler(packageName)
+			profiler.Profiler(packageName, profilingDoneChannel)
 		}()
 	}
+	for !profilingisDone {
+		cpuStats := profiler.CPUPercent()
+		graphPoints["Time"] = append(graphPoints["Time"], cpuStats[0])
+		graphPoints["Percent"] = append(graphPoints["Percent"], cpuStats[1])
 
-	cpuStats := profiler.CPUPercent()
-	graphPoints = append(graphPoints, point{cpuStats[0], cpuStats[1]})
+		graphPointsJSON, err := json.Marshal(graphPoints)
+		if err != nil {
+			panic(err)
+		}
+		w.Write(graphPointsJSON)
 
-	respondWithJSON(w, http.StatusOK, graphPoints)
+		timer := time.NewTimer(50 * time.Millisecond)
+		<-timer.C
+		profilingisDone = checkIfProfilingisDone()
+	}
+}
+
+func checkIfProfilingisDone() bool {
+	select {
+	case done := <-profilingDoneChannel:
+		fmt.Println("profiling is Done")
+		return done
+	default:
+		return false
+	}
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

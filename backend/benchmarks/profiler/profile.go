@@ -11,14 +11,15 @@ import (
 )
 
 //Profiler running from main
-func Profiler(packageName string) {
-	runPackage(packageName)
+func Profiler(packageName string, profilingDone chan bool) {
+	runPackage(packageName, profilingDone)
 }
 
-func runPackage(packageName string) {
+func runPackage(packageName string, profilingDone chan bool) {
 	//checkPackage
 	//checkPackageTest
 	//go CPUPercent()
+	defer profilingIsDone(profilingDone)
 	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
 	switch packageName {
 	case "sort":
@@ -28,8 +29,12 @@ func runPackage(packageName string) {
 	}
 }
 
+func profilingIsDone(profilingDone chan bool) {
+	profilingDone <- true
+}
+
 func CPUPercent() []string {
-	c, _ := cpu.Percent(5*time.Millisecond, false)
+	c, _ := cpu.Percent(45*time.Millisecond, false)
 	t := time.Now()
 	now := t.Format("2006-01-02 15:04:05")
 	line := []string{now, strconv.FormatFloat(c[0], 'f', 2, 64)} // Convert c from float64 to string
