@@ -1,68 +1,72 @@
 import React, { Component } from 'react'
 
+var LineChart = require("react-chartjs").Line
 const API = 'http://localhost:8080/cpu/live/sort'
 
-const exampleData = {
-    labels: ['8:05', '8:10', '8:15', '8:20'],
-    datasets: [
-      {
-        label: 'Example data',
-        data: [65, 59, 80, 81],
-        fillColor: "rgba(220,220,220,0)",
-        strokeColor: 'rgba(50,80,220,1)',
-        pointColor: 'rgba(50,80,220,1)',
-        pointHighlightFill: '#fff',
-      }
-    ],
-  };
+const chart1 = {
+  labels: ['Team1', 'Team2', 'Team3', 'Team4', 'Team5'],
+  datasets: [{
+    label: 'Team points',
+    data: [503, 385, 270, 133, 65],
+    backgroundColor: [
+      '#4DB6AC',
+      '#E57373',
+      '#7986CB',
+      '#F06292',
+      '#E0E0E0'
+    ]
+  }]
+}
 
-var LineChart = require("react-chartjs").Line;
+const chart2 = {
+  labels: ['Team1', 'Team2', 'Team3', 'Team4', 'Team5'],
+  datasets: [{
+    label: 'Team points 2',
+    data: [303, 185, 470, 313, 65],
+    backgroundColor: [
+      '#4DB6AC',
+      '#E57373',
+      '#7986CB',
+      '#F06292',
+      '#E0E0E0'
+    ]
+  }]
+}
+
+const Button = props => (
+  <button id="update-chart" onClick={props.handleOnClick}>Update</button>
+)
 
 class CpuGraph extends Component {
-
   constructor(props) {
     super(props)
 
+    this.handleUpdate = this.handleUpdate.bind(this)
+    this.update = false
+
     this.state = {
-      labels: [],
-      datasets: [
-        {
-          data: [],
-          fillColor: "rgba(220,220,220,0)",
-          strokeColor: 'rgba(50,80,220,1)',
-          pointColor: 'rgba(50,80,220,1)',
-          pointHighlightFill: '#fff',
-        }
-      ],
-      jsondata: [],
+      chartData: chart1
     }
+
+    console.log(this.state.chartData)
+    console.log(this.updated)
   }
 
-  
-  componentDidMount() {    
-    
-    fetch(API)
-    .then(response => {
-      if (response.ok) {
-        response.json()
-        .then(jsondata => this.updateData(jsondata[0], jsondata[1]))
-      }
+  handleUpdate() {
+    const chartData = this.updated ? chart1 : chart2
+    this.setState({chartData}, () => {
+      this.updated = this.updated ? false : true
+      console.log(this.state.chartData)
     })
-  }
-  
-  updateData(label, data){
-    //this.setState(this.state.labels.push(label))
-    this.setState({labels: label})
-    this.setState({datasets: [{ ...this.state.datasets }], data: data})
   }
 
   render() {
-    const { jsondata } = this.state
+    // const { jsondata } = this.state
 
     return (
       <div>
-        {jsondata}
-        <LineChart data={this.state} width="600" height="250"/>
+        <LineChart data={this.state.chartData} width="600" height="250"/>
+        <Button handleOnClick={this.handleUpdate} />
       </div>
     )
   }
