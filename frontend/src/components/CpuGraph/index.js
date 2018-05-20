@@ -28,13 +28,23 @@ class CpuGraph extends Component {
     console.log(this.updated)
   }
 
+  componentDidMount() {
+    fetch(API)
+      .then(response => {
+        if (response.ok) {
+          response.json()
+          .then(data => this.updateState(data))
+        }
+      })
+  }
+
   updateState(newData) {
     this.setState(prevState => ({
       ...prevState,
-      labels: ['8:05', '8:10', '8:15', '8:20', '8:25'],
+      labels: newData.time,
       datasets: {
         ...prevState.datasets,
-        data: [303, 185, 470, 313, 65]
+        data: newData.percent
       }
     }))
   }
