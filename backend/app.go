@@ -12,6 +12,14 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+type point struct {
+	Time    string
+	Percent string
+}
+
+var graphPoints []point
+var profiling = false
+
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	payload := map[string]string{"apiType": "This is a RESTful API"}
 	respondWithJSON(w, http.StatusOK, payload)
@@ -89,12 +97,17 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 
 func getLiveData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("package")
-	go func() {
-		profiler.Profiler(packageName)
-	}()
-	cpuStats := profiler.CPUPercent()
-	respondWithJSON(w, http.StatusOK, cpuStats)
+	if !profiling {
+		profiling = true
+		go func() {
+			profiler.Profiler(packageName)
+		}()
+	}
 
+	cpuStats := profiler.CPUPercent()
+	graphPoints = append(graphPoints, point{cpuStats[0], cpuStats[1]})
+
+	respondWithJSON(w, http.StatusOK, graphPoints)
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
