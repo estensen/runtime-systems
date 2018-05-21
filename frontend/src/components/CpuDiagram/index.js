@@ -3,10 +3,6 @@ import React, { Component } from 'react'
 const API = 'http://localhost:8080/cpu/diagram/'
 
 class CpuDiagram extends Component {
-  constructor(props) {
-    super(props)
-  }
-
   render() {
     const { match: { params: { programName } } } = this.props
 
