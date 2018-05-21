@@ -99,7 +99,7 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	respondWithPNG(w, http.StatusOK, png)
 }
 
-func getLiveData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("package")
 	profilingisDone := false
 
@@ -164,7 +164,7 @@ func main() {
 	router.GET("/cpu", getPrograms)
 	router.GET("/cpu/reports/:filename", getReportCPU)
 	router.GET("/cpu/diagram/:package", getCPUdiagram)
-	router.GET("/cpu/live/:package", getLiveData)
+	router.GET("/cpu/graph/:package", getGraphData)
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {
