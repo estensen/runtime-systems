@@ -173,5 +173,5 @@ func main() {
 		log.Println("Running API server in dev mode")
 	}
 
-	http.ListenAndServe(":8080", router)
+	http.ListenAndServe("localhost:8080", router)
 }
