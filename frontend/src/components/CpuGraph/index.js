@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 
 var LineChart = require("react-chartjs").Line
-const API = 'http://localhost:8080/cpu/live/sort'
+const API = 'http://localhost:8080/cpu/graph/sort'
 
 const chart = {
   labels: ['8:05', '8:10', '8:15', '8:20', '8:25'],
