@@ -1,36 +1,32 @@
 import React, { Component } from 'react'
 
-const API = 'http://localhost:8080/cpu/'
+const API = 'http://localhost:8080/cpu/report/sort'
 
 class CpuReport extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      reportLength: null
+      report: ""
     }
   }
-  componentDidMount() {    
-    const { match: { params } } = this.props
 
-    fetch(API + params.filename)
+  componentDidMount() {
+    fetch(API)
       .then(response => {
         if (response.ok) {
           response.json()
-          .then(data => this.setState({ reportLength: data.reportLength }))
+          .then(data => this.setState({ report: data }))
         }
       })
   }
 
   render() {
-    const { match: { params: { filename } } } = this.props
-    const { reportLength } = this.state
-
     return (
-      <div>
-        <h1>Length of report {filename}</h1>
-        {reportLength}
-      </div>
+    <div>
+      <h1>Report</h1>
+      <div>{this.state.report}</div>
+    </div>
     )
   }
 }

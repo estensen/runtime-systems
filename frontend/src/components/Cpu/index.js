@@ -8,7 +8,7 @@ class Cpu extends Component {
     super(props)
 
     this.state = {
-      filenames: []
+      programs: []
     }
   }
 
@@ -17,24 +17,34 @@ class Cpu extends Component {
       .then(response => {
         if (response.ok) {
           response.json()
-          .then(data => this.setState({ filenames: [...data.filenames] }))
+          .then(data => this.setState({ programs: [...data.programs] }))
         }
       })
   }
 
   render() {
-    const { filenames } = this.state
-    const listFilenames = (filenames.length > 1)
-      ? filenames.map(filename =>
-        <li key={filename}>
-        <Link to={`cpu/${filename}`}>{filename}</Link>
-        </li>)
+    const { programs } = this.state
+    const listPrograms = (programs.length > 1)
+      ? programs.map(program =>
+        <div>{program}
+          <ul>
+            <li key="Diagram">
+              <Link to={`cpu/${program}/diagram`}>Diagram</Link>
+            </li>
+            <li key="Graph">
+              <Link to={`cpu/${program}/graph`}>Graph</Link>
+            </li>
+            <li key="Report">
+              <Link to={`cpu/${program}/report`}>Report</Link>
+            </li>
+          </ul>
+        </div>)
       : <li>No files</li>
 
     return (
     <div>
       <h1>CPU</h1>
-      <ul>{listFilenames}</ul>
+      <ul>{listPrograms}</ul>
     </div>
     )
   }
