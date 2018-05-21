@@ -21,7 +21,7 @@ type point struct {
 }*/
 
 var graphPoints = make(map[string][]string)
-var profiling = false
+var profilingStarted = false
 var profilingDoneChannel = make(chan bool, 1)
 
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -100,34 +100,27 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func getLiveData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	enableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
 	packageName := ps.ByName("package")
 	profilingisDone := false
 
-	if !profiling {
-		profiling = true
+	if !profilingStarted {
+		profilingStarted = true
 		go func() {
 			profiler.Profiler(packageName, profilingDoneChannel)
 		}()
-	}
-	for !profilingisDone {
-		cpuStats := profiler.CPUPercent()
-		graphPoints["Time"] = append(graphPoints["Time"], cpuStats[0])
-		graphPoints["Percent"] = append(graphPoints["Percent"], cpuStats[1])
 
-		graphPointsJSON, err := json.Marshal(graphPoints)
-		if err != nil {
-			panic(err)
+		for !profilingisDone {
+			cpuStats := profiler.CPUPercent()
+			graphPoints["Time"] = append(graphPoints["Time"], cpuStats[0])
+			graphPoints["Percent"] = append(graphPoints["Percent"], cpuStats[1])
+
+			timer := time.NewTimer(50 * time.Millisecond)
+			<-timer.C
+			profilingisDone = checkIfProfilingisDone()
 		}
-		w.Write(graphPointsJSON)
-
-		timer := time.NewTimer(50 * time.Millisecond)
-		<-timer.C
-		profilingisDone = checkIfProfilingisDone()
 	}
+
+	respondWithJSON(w, http.StatusOK, graphPoints)
 }
 
 func checkIfProfilingisDone() bool {

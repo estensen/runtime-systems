@@ -36,7 +36,7 @@ func profilingIsDone(profilingDone chan bool) {
 func CPUPercent() []string {
 	c, _ := cpu.Percent(45*time.Millisecond, false)
 	t := time.Now()
-	now := t.Format("2006-01-02 15:04:05")
+	now := t.Format("15:04:05")
 	line := []string{now, strconv.FormatFloat(c[0], 'f', 2, 64)} // Convert c from float64 to string
 	return line
 
