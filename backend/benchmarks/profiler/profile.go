@@ -10,15 +10,11 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 )
 
-//Profiler running from main
 func Profiler(packageName string, profilingDone chan bool) {
 	runPackage(packageName, profilingDone)
 }
 
 func runPackage(packageName string, profilingDone chan bool) {
-	//checkPackage
-	//checkPackageTest
-	//go CPUPercent()
 	defer profilingIsDone(profilingDone)
 	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
 	switch packageName {
