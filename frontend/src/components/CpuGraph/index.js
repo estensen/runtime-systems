@@ -23,36 +23,33 @@ class CpuGraph extends Component {
     this.state = {
       chartData: chart
     }
-
-    console.log(this.state.chartData)
-    console.log(this.updated)
   }
 
   componentDidMount() {
-    fetch(API)
-      .then(response => {
-        if (response.ok) {
-          response.json()
-          .then(data => this.updateState(data))
-        }
-      })
+    (async() => {
+      try {
+        var response = await fetch(API)
+        var data = await response.json()
+        this.updateState(data)
+      } catch (e) {
+        console.log(e)
+      }
+    })()
   }
 
   updateState(newData) {
-    this.setState(prevState => ({
-      ...prevState,
-      labels: newData.time,
-      datasets: {
-        ...prevState.datasets,
-        data: newData.percent
-      }
-    }))
+    var chartData = {...this.state.chartData}
+    chartData.labels = newData.Time
+    chartData.datasets[0].data = newData.Percent
+    this.setState({chartData})
   }
 
   render() {
+    const { chartData } = this.state
+
     return (
       <div>
-        <LineChart data={this.state.chartData} width="600" height="250"/>
+        <LineChart data={chartData} width="600" height="250"/>
       </div>
     )
   }
