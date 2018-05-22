@@ -1,3 +1,4 @@
 tmp/ 
 diagrams/*
 !diagrams/.gitkeep
+*.txt
