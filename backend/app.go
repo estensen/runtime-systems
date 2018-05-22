@@ -56,7 +56,7 @@ func getPrograms(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 // Read file and return file length
 func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	dirname := "reports/"
-	filename := dirname + ps.ByName("filename")
+	filename := dirname + ps.ByName("program")
 
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		respondWithJSON(w, http.StatusNotFound, "File not found")
@@ -76,7 +76,7 @@ func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 // This method will run our profiler with the given package name
 // then create a PDF diagram with the given cpu.pprof file and show this on the webpage.
 func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	packageName := ps.ByName("package")
+	packageName := ps.ByName("program")
 	profiler.Profiler(packageName, profilingDoneChannel)
 
 	filename := packageName + ".png"
@@ -100,7 +100,7 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	packageName := ps.ByName("package")
+	packageName := ps.ByName("program")
 	profilingisDone := false
 
 	if !profilingStarted {
@@ -162,9 +162,9 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
 	router.GET("/cpu", getPrograms)
-	router.GET("/cpu/reports/:filename", getReportCPU)
-	router.GET("/cpu/diagram/:package", getCPUdiagram)
-	router.GET("/cpu/graph/:package", getGraphData)
+	router.GET("/cpu/reports/:program", getReportCPU)
+	router.GET("/cpu/diagram/:program", getCPUdiagram)
+	router.GET("/cpu/graph/:program", getGraphData)
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {
