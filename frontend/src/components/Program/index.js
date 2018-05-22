@@ -2,11 +2,6 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 
 class CpuProgram extends Component {
-
-  constructor(props) {
-    super(props)
-  }
-
   render() {
 
     const { match: { params: { programName } } } = this.props
