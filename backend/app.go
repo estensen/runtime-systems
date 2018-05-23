@@ -104,11 +104,14 @@ func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		runProfiling(packageName)
 	}
 	if checkIfReportExists(filename) {
-		report, err := os.Open("reports/" + filename)
+		report, err := ioutil.ReadFile("reports/" + filename)
 		if err != nil {
 			panic("Could not open " + filename)
 		}
-		respondWithJSON(w, http.StatusOK, report)
+
+		reportStr := string(report)
+
+		respondWithJSON(w, http.StatusOK, reportStr)
 	} else {
 		//create textfile to save terminal output in. File is created en reports directory
 		report, err := os.Create("reports/" + filename)
@@ -125,9 +128,10 @@ func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 		}
 
 		//save command output in textfile
+		reportStr := string(reportText)
 		report.Write(reportText)
-		
-		respondWithJSON(w, http.StatusOK, reportText)
+
+		respondWithJSON(w, http.StatusOK, reportStr)
 	}
 }
 
