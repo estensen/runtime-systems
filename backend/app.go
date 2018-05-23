@@ -95,6 +95,33 @@ func checkIfReportExists(packageName string) bool {
 	return true
 }
 
+func createReport(filename string) {
+	file, err := os.Create("reports/" + filename)
+	if err != nil {
+		panic("Could not create " + filename)
+	}
+	defer file.Close()
+
+	pproftext := exec.Command("go", "tool", "pprof", "-text", "cpu.pprof")
+	reportText, err := pproftext.Output()
+	if err != nil {
+		panic(err)
+	}
+
+	file.Write(reportText)
+}
+
+func readReport(filename string) string {
+	report, err := ioutil.ReadFile("reports/" + filename)
+	if err != nil {
+		panic("Could not open " + filename)
+	}
+
+	reportStr := string(report)
+
+	return reportStr
+}
+
 // Read file and return file length
 func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("program")
@@ -103,36 +130,13 @@ func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	if !checkIfPprofFileExists() {
 		runProfiling(packageName)
 	}
-	if checkIfReportExists(filename) {
-		report, err := ioutil.ReadFile("reports/" + filename)
-		if err != nil {
-			panic("Could not open " + filename)
-		}
-
-		reportStr := string(report)
-
-		respondWithJSON(w, http.StatusOK, reportStr)
-	} else {
-		//create textfile to save terminal output in. File is created en reports directory
-		report, err := os.Create("reports/" + filename)
-		if err != nil {
-			panic("Could not create " + filename)
-		}
-		defer report.Close()
-
-		//run command to create text from pprof
-		pproftext := exec.Command("go", "tool", "pprof", "-text", "cpu.pprof")
-		reportText, err := pproftext.Output()
-		if err != nil {
-			panic(err)
-		}
-
-		//save command output in textfile
-		reportStr := string(reportText)
-		report.Write(reportText)
-
-		respondWithJSON(w, http.StatusOK, reportStr)
+	if !checkIfReportExists(filename) {
+		createReport(filename)
 	}
+
+	reportStr := readReport(filename)
+
+	respondWithJSON(w, http.StatusOK, reportStr)
 }
 
 // This method will run our profiler with the given package name
