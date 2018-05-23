@@ -70,28 +70,22 @@ func runProfiling(packageName string) {
 
 func checkIfPprofFileExists() bool {
 	if _, err := os.Stat("cpu.pprof"); os.IsNotExist(err) {
-		fmt.Println("pprof does not exists")
 		return false
 	}
-	fmt.Println("pprof exists")
 	return true
 }
 
 func checkIfDiagramExists(packageName string) bool {
 	if _, err := os.Stat("./diagrams/" + packageName); os.IsNotExist(err) {
-		fmt.Println("diagram does not exists")
 		return false
 	}
-	fmt.Println("diagram exists")
 	return true
 }
 
 func checkIfReportExists(packageName string) bool {
 	if _, err := os.Stat("./reports/" + packageName); os.IsNotExist(err) {
-		fmt.Println("report does not exists")
 		return false
 	}
-	fmt.Println("report exists")
 	return true
 }
 
