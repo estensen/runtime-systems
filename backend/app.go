@@ -14,12 +14,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/*
-type point struct {
-	Time    string
-	Percent string
-}*/
-
 var graphPoints = make(map[string][]string)
 var profilingStarted = false
 var profilingDoneChannel = make(chan bool, 1)
@@ -53,54 +47,7 @@ func getPrograms(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-// Read file and return file length
-func getReportCPU(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	dirname := "reports/"
-	filename := dirname + ps.ByName("filename")
-
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		respondWithJSON(w, http.StatusNotFound, "File not found")
-	} else {
-		file, err := ioutil.ReadFile(filename)
-		if err != nil {
-			respondWithJSON(w, http.StatusBadRequest, "Could not read report file")
-		}
-
-		reportLength := len(file)
-
-		payload := map[string]int{"reportLength": reportLength}
-		respondWithJSON(w, http.StatusOK, payload)
-	}
-}
-
-// This method will run our profiler with the given package name
-// then create a PDF diagram with the given cpu.pprof file and show this on the webpage.
-func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	packageName := ps.ByName("package")
-	profiler.Profiler(packageName, profilingDoneChannel)
-
-	filename := packageName + ".png"
-
-	//create textfile to save terminal output in. File is created en reports directory
-	file, err := os.Create("diagrams/" + filename)
-	if err != nil {
-		panic("Could not create " + filename)
-	}
-	defer file.Close()
-
-	//run command to create text from pprof
-	pprofPNG := exec.Command("go", "tool", "pprof", "-png", "cpu.pprof")
-	png, err := pprofPNG.Output()
-	if err != nil {
-		panic(err)
-	}
-
-	file.Write(png)
-	respondWithPNG(w, http.StatusOK, png)
-}
-
-func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	packageName := ps.ByName("package")
+func runProfiling(packageName string) {
 	profilingisDone := false
 
 	if !profilingStarted {
@@ -119,7 +66,114 @@ func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 			profilingisDone = checkIfProfilingisDone()
 		}
 	}
+}
 
+func checkIfPprofFileExists() bool {
+	if _, err := os.Stat("cpu.pprof"); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func checkIfDiagramExists(packageName string) bool {
+	if _, err := os.Stat("./diagrams/" + packageName); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func checkIfReportExists(packageName string) bool {
+	if _, err := os.Stat("./reports/" + packageName); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func createReport(filename string) {
+	file, err := os.Create("reports/" + filename)
+	if err != nil {
+		panic("Could not create " + filename)
+	}
+	defer file.Close()
+
+	pproftext := exec.Command("go", "tool", "pprof", "-text", "cpu.pprof")
+	reportText, err := pproftext.Output()
+	if err != nil {
+		panic(err)
+	}
+
+	file.Write(reportText)
+}
+
+func readReport(filename string) string {
+	report, err := ioutil.ReadFile("reports/" + filename)
+	if err != nil {
+		panic("Could not open " + filename)
+	}
+
+	reportStr := string(report)
+
+	return reportStr
+}
+
+// Read file and return file length
+func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	packageName := ps.ByName("program")
+	filename := packageName + ".txt"
+
+	if !checkIfPprofFileExists() {
+		runProfiling(packageName)
+	}
+	if !checkIfReportExists(filename) {
+		createReport(filename)
+	}
+
+	reportStr := readReport(filename)
+
+	respondWithJSON(w, http.StatusOK, reportStr)
+}
+
+// This method will run our profiler with the given package name
+// then create a PDF diagram with the given cpu.pprof file and show this on the webpage.
+func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	packageName := ps.ByName("program")
+	filename := packageName + ".png"
+
+	if !checkIfPprofFileExists() {
+		runProfiling(packageName)
+	}
+
+	if checkIfDiagramExists(filename) {
+		diagram, err := ioutil.ReadFile("diagrams/" + filename)
+		if err != nil {
+			panic("Could not open " + filename)
+		}
+		respondWithPNG(w, http.StatusOK, diagram)
+	} else {
+		//create textfile to save terminal output in. File is created in reports directory
+		diagram, err := os.Create("diagrams/" + filename)
+		if err != nil {
+			panic("Could not create " + filename)
+		}
+		defer diagram.Close()
+
+		//run command to create text from pprof
+		pprofPNG := exec.Command("go", "tool", "pprof", "-png", "cpu.pprof")
+		png, err := pprofPNG.Output()
+		if err != nil {
+			panic(err)
+		}
+
+		diagram.Write(png)
+		respondWithPNG(w, http.StatusOK, png)
+	}
+}
+
+func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	packageName := ps.ByName("program")
+	if !checkIfPprofFileExists() {
+		runProfiling(packageName)
+	}
 	respondWithJSON(w, http.StatusOK, graphPoints)
 }
 
@@ -162,9 +216,9 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
 	router.GET("/cpu", getPrograms)
-	router.GET("/cpu/reports/:filename", getReportCPU)
-	router.GET("/cpu/diagram/:package", getCPUdiagram)
-	router.GET("/cpu/graph/:package", getGraphData)
+	router.GET("/cpu/report/:program", getCPUreport)
+	router.GET("/cpu/diagram/:program", getCPUdiagram)
+	router.GET("/cpu/graph/:program", getGraphData)
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {

@@ -7,7 +7,7 @@ class CpuReport extends Component {
     super(props)
 
     this.state = {
-      report: ""
+      report: []
     }
   }
 
