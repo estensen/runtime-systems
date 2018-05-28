@@ -1,43 +1,70 @@
 package wordsearch
 
 import (
+	"bufio"
 	"fmt"
-	"io/ioutil"
+	"log"
+	"os"
+	"regexp"
+	"strings"
 )
 
 var wordMap = make(map[string]int)
-var wordList = make([]string, 0)
+var wordList = []string{}
 
 func WordSearchWithMap(word string) {
+	lowerStringWord := strings.ToLower(word)
 	readTextFile(true)
-	if _, ok := wordMap[word]; ok {
-		fmt.Println("Word: %s exists in story", word)
+	if _, ok := wordMap[lowerStringWord]; ok {
+		fmt.Printf("Word: %s exists in story\n", word)
+	} else {
+		fmt.Printf("Word: %s does not exist in story\n", word)
 	}
-	fmt.Println("Word: %s does not exist in story", word)
 }
 
 func WordSearchWithList(word string) {
+	lowerStringWord := strings.ToLower(word)
 	readTextFile(false)
+	wordExists := false
 	for _, textword := range wordList {
-		if textword == word {
-			fmt.Println("Word: %s exists in story", word)
+		if textword == lowerStringWord {
+			fmt.Printf("Word: %s exists in story\n", word)
+			wordExists = true
+			break
 		}
 	}
-	fmt.Println("Word: %s does not exist in story", word)
+	if wordExists {
+		fmt.Printf("Word: %s does not exist in story\n", word)
+	}
+
+}
+
+func stringToAllAlpha(text string) string {
+	reg, err := regexp.Compile("[^a-zA-Z]+")
+	if err != nil {
+		log.Fatal("Unable to convert string to only alpha")
+	}
+	return reg.ReplaceAllString(text, "")
 }
 
 func readTextFile(useMap bool) {
-	text, err := ioutil.ReadFile("./text.txt")
+	text, err := os.Open("programs/wordSearch/story.txt")
 	if err != nil {
 		panic("Unable to read textfile")
 	}
+	scanner := bufio.NewScanner(text)
+	scanner.Split(bufio.ScanWords)
 	if useMap {
-		for _, word := range text {
-			wordMap[string(word)] = wordMap[string(word)] + 1
+		for scanner.Scan() {
+			lowerStringWord := stringToAllAlpha(strings.ToLower(scanner.Text()))
+			wordMap[lowerStringWord] = wordMap[lowerStringWord] + 1
 		}
 	} else {
-		for i, word := range text {
-			wordList[i] = string(word)
+		for scanner.Scan() {
+			lowerStringWord := stringToAllAlpha(strings.ToLower(scanner.Text()))
+			fmt.Println(lowerStringWord)
+			wordList = append(wordList, lowerStringWord)
+
 		}
 	}
 }
