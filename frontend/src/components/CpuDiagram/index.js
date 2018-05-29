@@ -23,8 +23,10 @@ class CpuDiagram extends Component {
     return (
       <div>
         <Paper className={classes.root} elevation={4}>
-          <Typography variant="headline" component="h3">
-            <h1>{programName}</h1>
+          <Typography variant="headline" component="h1">
+            {programName} diagram
+          </Typography>
+          <Typography component="div">
             <img src={API + programName} width={1400} alt="Program diagram"/>
           </Typography>
         </Paper>
@@ -34,7 +36,7 @@ class CpuDiagram extends Component {
 }
 
 
-CpuDiagram.PropTypes = {
+CpuDiagram.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 

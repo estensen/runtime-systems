@@ -64,8 +64,10 @@ class CpuGraph extends Component {
     return (
       <div>
         <Paper className={classes.root} elevation={4}>
-          <Typography variant="headline" component="h3">
-            <h1>{programName} % CPU usage</h1>
+          <Typography variant="headline" component="h1">
+            {programName} % CPU usage
+          </Typography>
+          <Typography component="div">
             <LineChart data={chartData} width="600" height="250"/>
           </Typography>
         </Paper>
@@ -74,7 +76,7 @@ class CpuGraph extends Component {
   }
 }
 
-CpuGraph.PropTypes = {
+CpuGraph.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 

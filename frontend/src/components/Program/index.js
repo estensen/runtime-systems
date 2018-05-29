@@ -21,29 +21,26 @@ function CpuProgram(props) {
   return (
     <div>
       <Paper className={classes.root} elevation={4}>
-        <Typography variant="headline" component="h3">
-          <h1>CPU</h1>
-          <h2>{programName}</h2>
-          <div>
-              <ul>
-                <li key="Diagram">
-                  <Link to={`${programName}/diagram`}>Diagram</Link>
-                </li>
-                <li key="Graph">
-                  <Link to={`${programName}/graph`}>Graph</Link>
-                </li>
-                <li key="Report">
-                  <Link to={`${programName}/report`}>Report</Link>
-                </li>
-              </ul>
-          </div>
+        <Typography variant="headline" component="h1">
+          CPU {programName}
+        </Typography>
+        <Typography component="ul">
+            <li key="Diagram">
+              <Link to={`${programName}/diagram`}>Diagram</Link>
+            </li>
+            <li key="Graph">
+              <Link to={`${programName}/graph`}>Graph</Link>
+            </li>
+            <li key="Report">
+              <Link to={`${programName}/report`}>Report</Link>
+            </li>
         </Typography>
       </Paper>
     </div>
   )
 }
 
-CpuProgram.PropTypes = {
+CpuProgram.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 

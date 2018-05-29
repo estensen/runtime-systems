@@ -4,8 +4,6 @@ import { withStyles } from '@material-ui/core/styles'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 
-const API = 'http://localhost:8080'
-
 const styles = theme => ({
   root: theme.mixins.gutters({
     width: 400,
@@ -16,30 +14,16 @@ const styles = theme => ({
 })
 
 class Home extends Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      apiType: null
-    }
-  }
-
-  componentDidMount() {
-    fetch(API)
-      .then(response => response.json())
-      .then(data => this.setState({ apiType: data.apiType }))
-  }
-
   render() {
     const { classes } = this.props
-    const { apiType } = this.state
 
     return (
       <div>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            <h1>Home</h1>
-            {apiType}
+            Home
+          </Typography>
+          <Typography component="p">
             Add instructions on how to use the app here
           </Typography>
         </Paper>
@@ -48,7 +32,7 @@ class Home extends Component {
   }
 }
 
-Home.PropTypes = {
+Home.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 

@@ -40,9 +40,11 @@ class CpuReport extends Component {
     return (
       <div>
         <Paper className={classes.root} elevation={4}>
-          <Typography variant="headline" component="h3">
-            <h1>Report</h1>
-            <pre>{this.state.report}</pre>
+          <Typography variant="headline" component="h1">
+            Report
+          </Typography>
+          <Typography component="pre">
+            {this.state.report}
           </Typography>
         </Paper>
       </div>
@@ -50,7 +52,7 @@ class CpuReport extends Component {
   }
 }
 
-CpuReport.PropTypes = {
+CpuReport.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
