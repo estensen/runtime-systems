@@ -19,10 +19,11 @@ func Profiler(packageName string, profilingDone chan bool) {
 func runPackage(packageName string, profilingDone chan bool) {
 	defer profilingIsDone(profilingDone)
 	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+	fmt.Println(packageName)
 	switch packageName {
 	case "sort":
 		sort.Sort()
-	case "fiboncci":
+	case "fibonacci":
 		fibonacci.Fibonacci(100000000)
 	case "wordSearch":
 		//change WordSearchWithList to WordSearchWithMap to see difference in CPU time

@@ -13,30 +13,40 @@ var wordMap = make(map[string]int)
 var wordList = []string{}
 
 func WordSearchWithMap(word string) {
-	lowerStringWord := strings.ToLower(word)
 	readTextFile(true)
-	if _, ok := wordMap[lowerStringWord]; ok {
+	if checkifWordExistsMap(word) {
 		fmt.Printf("Word: %s exists in story\n", word)
 	} else {
 		fmt.Printf("Word: %s does not exist in story\n", word)
 	}
 }
 
-func WordSearchWithList(word string) {
+func checkifWordExistsMap(word string) bool {
 	lowerStringWord := strings.ToLower(word)
-	readTextFile(false)
-	wordExists := false
-	for _, textword := range wordList {
-		if textword == lowerStringWord {
-			fmt.Printf("Word: %s exists in story\n", word)
-			wordExists = true
-			break
-		}
+	if _, ok := wordMap[lowerStringWord]; ok {
+		return true
 	}
-	if !wordExists {
+	return false
+}
+
+func WordSearchWithList(word string) {
+	readTextFile(false)
+	if checkIfWordExistsList(word) {
+		fmt.Printf("Word: %s exists in story\n", word)
+	} else {
 		fmt.Printf("Word: %s does not exist in story\n", word)
 	}
+}
 
+func checkIfWordExistsList(word string) bool {
+	lowerStringWord := strings.ToLower(word)
+	readTextFile(false)
+	for _, textword := range wordList {
+		if textword == lowerStringWord {
+			return true
+		}
+	}
+	return false
 }
 
 func stringToAllAlpha(text string) string {
@@ -48,9 +58,9 @@ func stringToAllAlpha(text string) string {
 }
 
 func readTextFile(useMap bool) {
-	text, err := os.Open("programs/wordSearch/story.txt")
+	text, err := os.Open("./benchmarks/programs/wordSearch/story.txt")
 	if err != nil {
-		panic("Unable to read textfile")
+		panic("Unable to read story")
 	}
 	scanner := bufio.NewScanner(text)
 	scanner.Split(bufio.ScanWords)
