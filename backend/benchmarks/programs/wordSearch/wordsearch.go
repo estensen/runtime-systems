@@ -67,7 +67,7 @@ func readTextFile(useMap bool) {
 	if useMap {
 		for scanner.Scan() {
 			lowerStringWord := stringToAllAlpha(strings.ToLower(scanner.Text()))
-			wordMap[lowerStringWord] = wordMap[lowerStringWord] + 1
+			wordMap[lowerStringWord]++
 		}
 	} else {
 		for scanner.Scan() {
