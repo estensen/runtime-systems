@@ -1,4 +1,4 @@
-package wordsearch
+package wordSearch
 
 import (
 	"bufio"
@@ -33,7 +33,7 @@ func WordSearchWithList(word string) {
 			break
 		}
 	}
-	if wordExists {
+	if !wordExists {
 		fmt.Printf("Word: %s does not exist in story\n", word)
 	}
 
