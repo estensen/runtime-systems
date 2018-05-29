@@ -8,7 +8,6 @@ const API = 'http://localhost:8080/cpu/report/sort'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
-    width: 1400,
     margin: '0 auto',
     paddingTop: 16,
     paddingBottom: 16,

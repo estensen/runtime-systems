@@ -1,7 +1,20 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import { withStyles } from '@material-ui/core/styles'
+import Paper from '@material-ui/core/Paper'
+import Typography from '@material-ui/core/Typography'
 
 var LineChart = require("react-chartjs").Line
 const API = 'http://localhost:8080/cpu/graph/sort'
+
+const styles = theme => ({
+  root: theme.mixins.gutters({
+    margin: '0 auto',
+    paddingTop: 16,
+    paddingBottom: 16,
+    marginTop: theme.spacing.unit * 3,
+  }),
+})
 
 const chart = {
   labels: ['8:05', '8:10', '8:15', '8:20', '8:25'],
@@ -14,7 +27,6 @@ const chart = {
     pointHighlightFill: '#fff',
   }]
 }
-
 
 class CpuGraph extends Component {
   constructor(props) {
@@ -45,14 +57,25 @@ class CpuGraph extends Component {
   }
 
   render() {
+    const { match: { params: { programName } } } = this.props
+    const { classes } = this.props
     const { chartData } = this.state
 
     return (
       <div>
-        <LineChart data={chartData} width="600" height="250"/>
+        <Paper className={classes.root} elevation={4}>
+          <Typography variant="headline" component="h3">
+            <h1>{programName}</h1>
+            <LineChart data={chartData} width="600" height="250"/>
+          </Typography>
+        </Paper>
       </div>
     )
   }
 }
 
-export default CpuGraph
+CpuGraph.PropTypes = {
+  classes: PropTypes.object.isRequired,
+}
+
+export default withStyles(styles)(CpuGraph)
