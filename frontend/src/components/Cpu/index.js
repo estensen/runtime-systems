@@ -1,7 +1,20 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
+import { withStyles } from '@material-ui/core/styles'
+import Paper from '@material-ui/core/Paper'
+import Typography from '@material-ui/core/Typography'
 
 const API = 'http://localhost:8080/cpu'
+
+const styles = theme => ({
+  root: theme.mixins.gutters({
+    width: 400,
+    paddingTop: 16,
+    paddingBottom: 16,
+    marginTop: theme.spacing.unit * 3,
+  }),
+})
 
 class Cpu extends Component {
   constructor(props) {
@@ -23,6 +36,7 @@ class Cpu extends Component {
   }
 
   render() {
+    const { classes } = this.props
     const { programs } = this.state
     const listPrograms = (programs.length > 1)
       ? programs.map(program =>
@@ -33,11 +47,21 @@ class Cpu extends Component {
 
     return (
     <div>
-      <h1>CPU</h1>
-      <div>{listPrograms}</div>
+      <Paper className={classes.root} elevation={4}>
+          <Typography variant="headline" component="h1">
+            CPU
+          </Typography>
+          <Typography component="div">
+            {listPrograms}
+          </Typography>
+      </Paper>
     </div>
     )
   }
 }
 
-export default Cpu
+Cpu.propTypes = {
+  classes: PropTypes.object.isRequired,
+}
+
+export default withStyles(styles)(Cpu)
