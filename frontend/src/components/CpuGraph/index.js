@@ -17,10 +17,10 @@ const styles = theme => ({
 })
 
 const chart = {
-  labels: ['8:05', '8:10', '8:15', '8:20', '8:25'],
+  labels: ['0'],
   datasets: [{
     label: 'CPU Utilization',
-    data: [303, 185, 470, 313, 65],
+    data: [0],
     fillColor: "rgba(220,220,220,0)",
     strokeColor: 'rgba(50,80,220,1)',
     pointColor: 'rgba(50,80,220,1)',
@@ -65,7 +65,7 @@ class CpuGraph extends Component {
       <div>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            <h1>{programName}</h1>
+            <h1>{programName} % CPU usage</h1>
             <LineChart data={chartData} width="600" height="250"/>
           </Typography>
         </Paper>
