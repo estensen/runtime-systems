@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
+import Button from '@material-ui/core/Button'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -14,31 +15,65 @@ const styles = theme => ({
   }),
 })
 
-function CpuProgram(props) {
-  const { match: { params: { programName } } } = props
-  const { classes } = props
 
+class CpuProgram extends React.Component {
+  constructor(props){
+    super(props)
+    this.toggle = this.toggle.bind(this);
+    this.state = {
+      isProfiled: false
+    }
+  }
+
+  toggle() {
+    if (this.state.isProfiled) {
+      this.setState({isProfiled: false})
+    } else {
+      this.setState({isProfiled: true})
+    }
+    
+  }
+  render () {
+    const isProfiled = this.state.isProfiled;
+    const { match: { params: { programName } } } = this.props
+    const { classes } = this.props
+
+    const profilingButton = isProfiled ? (
+      <div>
+        <Button variant="outlined" size="small" className={classes.button} onClick={this.toggle}>
+            Run Profiling
+        </Button>
+        <Typography component="ul">
+          <li key="Diagram">
+            <Link to={`${programName}/diagram`}>Diagram</Link>
+          </li>
+          <li key="Graph">
+            <Link to={`${programName}/graph`}>Graph</Link>
+          </li>
+          <li key="Report">
+            <Link to={`${programName}/report`}>Report</Link>
+          </li>
+        </Typography> 
+      </div>
+    ) : (
+      <Button variant="outlined" size="small" className={classes.button} onClick={this.toggle}>
+          Run Profiling
+      </Button>
+    );
+  
   return (
     <div>
       <Paper className={classes.root} elevation={4}>
         <Typography variant="headline" component="h1">
           CPU {programName}
         </Typography>
-        <Typography component="ul">
-            <li key="Diagram">
-              <Link to={`${programName}/diagram`}>Diagram</Link>
-            </li>
-            <li key="Graph">
-              <Link to={`${programName}/graph`}>Graph</Link>
-            </li>
-            <li key="Report">
-              <Link to={`${programName}/report`}>Report</Link>
-            </li>
-        </Typography>
+        {profilingButton}
       </Paper>
     </div>
   )
 }
+}
+
 
 CpuProgram.propTypes = {
   classes: PropTypes.object.isRequired,
