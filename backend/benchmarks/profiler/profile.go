@@ -19,7 +19,6 @@ func Profiler(packageName string, profilingDone chan bool) {
 func runPackage(packageName string, profilingDone chan bool) {
 	defer profilingIsDone(profilingDone)
 	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
-	fmt.Println(packageName)
 	switch packageName {
 	case "sort":
 		sort.Sort()

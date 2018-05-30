@@ -47,8 +47,19 @@ func getPrograms(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func runProfiling(packageName string) {
+func deleteOldProfile() {
+	filepath := "cpu.pprof"
+	_, err := os.Open(filepath)
+	if err == nil {
+		os.Remove(filepath)
+	}
+}
+
+func runProfiling(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	profilingisDone := false
+	packageName := ps.ByName("program")
+
+	deleteOldProfile()
 
 	if !profilingStarted {
 		profilingStarted = true
@@ -121,9 +132,6 @@ func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	packageName := ps.ByName("program")
 	filename := packageName + ".txt"
 
-	if !checkIfPprofFileExists() {
-		runProfiling(packageName)
-	}
 	if !checkIfReportExists(filename) {
 		createReport(filename)
 	}
@@ -138,10 +146,6 @@ func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("program")
 	filename := packageName + ".png"
-
-	if !checkIfPprofFileExists() {
-		runProfiling(packageName)
-	}
 
 	if checkIfDiagramExists(filename) {
 		diagram, err := ioutil.ReadFile("diagrams/" + filename)
@@ -170,10 +174,6 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 }
 
 func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	packageName := ps.ByName("program")
-	if !checkIfPprofFileExists() {
-		runProfiling(packageName)
-	}
 	respondWithJSON(w, http.StatusOK, graphPoints)
 }
 
@@ -216,6 +216,7 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
 	router.GET("/cpu", getPrograms)
+	router.GET("/cpu/profile/:program", runProfiling)
 	router.GET("/cpu/report/:program", getCPUreport)
 	router.GET("/cpu/diagram/:program", getCPUdiagram)
 	router.GET("/cpu/graph/:program", getGraphData)
