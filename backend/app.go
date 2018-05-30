@@ -77,6 +77,9 @@ func runProfiling(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 			profilingisDone = checkIfProfilingisDone()
 		}
 	}
+	payload := map[string]bool{"isProfiled": true} // Hardcoded
+
+	respondWithJSON(w, http.StatusOK, payload)
 }
 
 func checkIfPprofFileExists() bool {
