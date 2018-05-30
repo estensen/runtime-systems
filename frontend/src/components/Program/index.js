@@ -21,7 +21,8 @@ class CpuProgram extends React.Component {
     super(props)
     this.toggle = this.toggle.bind(this);
     this.state = {
-      isProfiled: false
+      isProfiled: false,
+      programName: this.props.programName
     }
   }
 
@@ -29,10 +30,17 @@ class CpuProgram extends React.Component {
     if (this.state.isProfiled) {
       this.setState({isProfiled: false})
     } else {
-      this.setState({isProfiled: true})
+      this.runProfiling
     }
-    
   }
+
+  runProfiling(){
+    fetch('http://localhost:8080/cpu/runprofiling/wordSearch')
+    .then((result) => {
+      this.setState({isProfiled: true})
+    })
+  }
+  
   render () {
     const isProfiled = this.state.isProfiled;
     const { match: { params: { programName } } } = this.props
@@ -40,17 +48,17 @@ class CpuProgram extends React.Component {
 
     const profilingButton = isProfiled ? (
       <div>
-        <Button variant="outlined" size="small" className={classes.button} onClick={this.toggle}>
+        <Button variant="outlined" size="small" className={classes.button} onClick={this.toggle} disabled="true">
             Run Profiling
         </Button>
-        <Typography component="ul">
-          <li key="Diagram">
+        <Typography component="ul" style={{ margin: 10 }}>
+          <li key="Diagram" style={{ margin: 5 }}>
             <Link to={`${programName}/diagram`}>Diagram</Link>
           </li>
-          <li key="Graph">
+          <li key="Graph" style={{ margin: 5 }}>
             <Link to={`${programName}/graph`}>Graph</Link>
           </li>
-          <li key="Report">
+          <li key="Report" style={{ margin: 5 }}>
             <Link to={`${programName}/report`}>Report</Link>
           </li>
         </Typography> 
@@ -65,7 +73,7 @@ class CpuProgram extends React.Component {
     <div>
       <Paper className={classes.root} elevation={4}>
         <Typography variant="headline" component="h1">
-          CPU {programName}
+          CPU: {programName}
         </Typography>
         {profilingButton}
       </Paper>

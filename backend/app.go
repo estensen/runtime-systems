@@ -220,6 +220,7 @@ func main() {
 	router.GET("/cpu/report/:program", getCPUreport)
 	router.GET("/cpu/diagram/:program", getCPUdiagram)
 	router.GET("/cpu/graph/:program", getGraphData)
+	router.GET("/cpu/runprofiling/:program", runProfiling)
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {
