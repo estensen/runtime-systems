@@ -47,8 +47,8 @@ func getPrograms(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func deleteOldProfile(program string) {
-	filepath := "benchmarks/programs/" + program + "/cpu.pprof"
+func deleteOldProfile(program string, profileType string) {
+	filepath := "benchmarks/programs/" + program + "/" + profileType + ".pprof"
 	_, err := os.Open(filepath)
 	if err == nil {
 		os.Remove(filepath)
@@ -61,7 +61,7 @@ func runProfiling(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 	if !profilingIsRunning {
 		profilingIsRunning = true
-		deleteOldProfile(packageName)
+		deleteOldProfile(packageName, profileType)
 		go func() {
 			profiler.Profiler(packageName, profileType, profilingDoneChannel)
 		}()
@@ -82,20 +82,18 @@ func runProfiling(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 func checkIfPprofFileExists(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("program")
+	profileType := ps.ByName("profileType")
+	if profileType == "memory" {
+		profileType = "mem"
+	}
+
 	payload := map[string]bool{"profileExists": true}
-	pprofPath := "benchmarks/programs/" + packageName + "/cpu.pprof"
+	pprofPath := "benchmarks/programs/" + packageName + "/" + profileType + ".pprof"
 	fmt.Println(pprofPath)
 	if _, err := os.Stat(pprofPath); os.IsNotExist(err) {
 		payload["profileExists"] = false
 	}
 	respondWithJSON(w, http.StatusOK, payload)
-}
-
-func checkIfDiagramExists(packageName string) bool {
-	if _, err := os.Stat("./diagrams/" + packageName); os.IsNotExist(err) {
-		return false
-	}
-	return true
 }
 
 func checkIfReportExists(packageName string) bool {
@@ -183,6 +181,13 @@ func getDiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	}
 }
 
+func checkIfDiagramExists(packageName string) bool {
+	if _, err := os.Stat("./diagrams/" + packageName); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
 func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	respondWithJSON(w, http.StatusOK, graphPoints)
 }
@@ -225,11 +230,11 @@ func enableCors(w *http.ResponseWriter) {
 func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
-	router.GET("/programs/:programType", getPrograms)
-	router.GET("/checkProfiling/:programType/:program", checkIfPprofFileExists)
-	router.GET("/report/:programType/:program", getReport)
-	router.GET("/diagram/:programType/:program", getDiagram)
-	router.GET("/graph/:programType/:program", getGraphData)
+	router.GET("/programs/:profileType", getPrograms)
+	router.GET("/checkProfiling/:profileType/:program", checkIfPprofFileExists)
+	router.GET("/report/:profileType/:program", getReport)
+	router.GET("/diagram/:profileType/:program", getDiagram)
+	router.GET("/graph/:profileType/:program", getGraphData)
 	router.GET("/runprofiling/:profileType/:program", runProfiling)
 
 	env := os.Getenv("APP_ENV")

@@ -39,7 +39,7 @@ class Program extends Component {
   
   profile = () => {
     const { match: { params: { programName, programType } } } = this.props
-    const API = `http://localhost:8080/runprofiling/${programType}/${programName}/`  // Hardcoded
+    const API = `http://localhost:8080/runprofiling/${programType}/${programName}`  // Hardcoded
     fetch(API)
       .then(response => {
         if (response.ok) {

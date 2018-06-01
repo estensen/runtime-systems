@@ -26,6 +26,8 @@ class ProgramType extends Component {
   
   componentDidMount() {
     const { match: { params: { programType } } } = this.props
+    console.log(programType);
+    
     const API = `http://localhost:8080/programs/${programType}`
 
     fetch(API)
