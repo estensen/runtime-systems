@@ -12,13 +12,13 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 )
 
-func Profiler(packageName string, profilingDone chan bool) {
-	runPackage(packageName, profilingDone)
+func Profiler(packageName string, profilingRunning chan bool) {
+	runPackage(packageName, profilingRunning)
 }
 
-func runPackage(packageName string, profilingDone chan bool) {
-	defer profilingIsDone(profilingDone)
-	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
+func runPackage(packageName string, profilingRunning chan bool) {
+	defer profilingIsRunning(profilingRunning)
+	defer profile.Start(profile.CPUProfile, profile.ProfilePath("./benchmarks/programs/"+packageName)).Stop()
 	switch packageName {
 	case "sort":
 		sort.Sort()
@@ -32,8 +32,8 @@ func runPackage(packageName string, profilingDone chan bool) {
 	}
 }
 
-func profilingIsDone(profilingDone chan bool) {
-	profilingDone <- true
+func profilingIsRunning(profilingRunning chan bool) {
+	profilingRunning <- false
 }
 
 func CPUPercent() []string {

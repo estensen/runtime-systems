@@ -6,7 +6,8 @@ import Button from '@material-ui/core/Button'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 
-const API = 'http://localhost:8080/cpu/runprofiling/sort'  // Hardcoded
+const API = 'http://localhost:8080/cpu/runprofiling/'  // Hardcoded
+const API_checkProfile = 'http://localhost:8080/cpu/checkProfiling/'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -27,11 +28,20 @@ class CpuProgram extends Component {
   }
 
   componentDidMount() {
-    this.profile()
+    const { match: { params: { programName } } } = this.props
+    console.log(programName)
+      fetch(API_checkProfile+programName)
+        .then(response => {
+          if (response.ok) {
+            response.json()
+            .then(data => this.setState({ isProfiled: data.profileExists }))
+          }
+        })
   }
 
   profile = () => {
-    fetch(API)
+    const { match: { params: { programName } } } = this.props
+    fetch(API + programName)
       .then(response => {
         if (response.ok) {
           response.json()

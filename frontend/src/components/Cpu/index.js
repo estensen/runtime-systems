@@ -21,7 +21,7 @@ class Cpu extends Component {
     super(props)
 
     this.state = {
-      programs: []
+      programs: [],
     }
   }
 

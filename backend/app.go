@@ -15,8 +15,8 @@ import (
 )
 
 var graphPoints = make(map[string][]string)
-var profilingStarted = false
 var profilingDoneChannel = make(chan bool, 1)
+var profilingIsRunning = false
 
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	payload := map[string]string{"apiType": "This is a RESTful API"}
@@ -47,8 +47,8 @@ func getPrograms(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func deleteOldProfile() {
-	filepath := "cpu.pprof"
+func deleteOldProfile(program string) {
+	filepath := "benchmarks/programs/" + program + "/cpu.pprof"
 	_, err := os.Open(filepath)
 	if err == nil {
 		os.Remove(filepath)
@@ -56,37 +56,38 @@ func deleteOldProfile() {
 }
 
 func runProfiling(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	profilingisDone := false
 	packageName := ps.ByName("program")
 
-	deleteOldProfile()
-
-	if !profilingStarted {
-		profilingStarted = true
+	if !profilingIsRunning {
+		profilingIsRunning = true
+		deleteOldProfile(packageName)
 		go func() {
 			profiler.Profiler(packageName, profilingDoneChannel)
 		}()
 
-		for !profilingisDone {
+		for profilingIsRunning {
 			cpuStats := profiler.CPUPercent()
 			graphPoints["Time"] = append(graphPoints["Time"], cpuStats[0])
 			graphPoints["Percent"] = append(graphPoints["Percent"], cpuStats[1])
 
 			timer := time.NewTimer(50 * time.Millisecond)
 			<-timer.C
-			profilingisDone = checkIfProfilingisDone()
+			profilingIsRunning = checkIfProfilingisDone()
 		}
 	}
 	payload := map[string]bool{"isProfiled": true} // Hardcoded
-
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func checkIfPprofFileExists() bool {
-	if _, err := os.Stat("cpu.pprof"); os.IsNotExist(err) {
-		return false
+func checkIfPprofFileExists(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	packageName := ps.ByName("program")
+	payload := map[string]bool{"profileExists": true}
+	pprofPath := "benchmarks/programs/" + packageName + "/cpu.pprof"
+	fmt.Println(pprofPath)
+	if _, err := os.Stat(pprofPath); os.IsNotExist(err) {
+		payload["profileExists"] = false
 	}
-	return true
+	respondWithJSON(w, http.StatusOK, payload)
 }
 
 func checkIfDiagramExists(packageName string) bool {
@@ -110,7 +111,9 @@ func createReport(filename string) {
 	}
 	defer file.Close()
 
-	pproftext := exec.Command("go", "tool", "pprof", "-text", "cpu.pprof")
+	pprofPath := "benchmarks/programs/" + filename + "/cpu.pprof"
+
+	pproftext := exec.Command("go", "tool", "pprof", "-text", pprofPath)
 	reportText, err := pproftext.Output()
 	if err != nil {
 		panic(err)
@@ -186,7 +189,7 @@ func checkIfProfilingisDone() bool {
 		fmt.Println("profiling is Done")
 		return done
 	default:
-		return false
+		return true
 	}
 }
 
@@ -219,7 +222,7 @@ func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
 	router.GET("/cpu", getPrograms)
-	router.GET("/cpu/profile/:program", runProfiling)
+	router.GET("/cpu/checkProfiling/:program", checkIfPprofFileExists)
 	router.GET("/cpu/report/:program", getCPUreport)
 	router.GET("/cpu/diagram/:program", getCPUdiagram)
 	router.GET("/cpu/graph/:program", getGraphData)
