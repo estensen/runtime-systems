@@ -5,7 +5,7 @@ import "../../App.css"
 import ProgramType from '../ProgramType'
 import Diagram from '../Diagram'
 import Graph from '../Graph'
-import CpuReport from '../CpuReport'
+import Report from '../Report'
 import Home from '../Home'
 import Program from '../Program' 
 import Memory from '../Memory'
@@ -18,7 +18,7 @@ const Main = () => (
       <Route exact path='/:programType/:programName' component={Program}/>
       <Route path='/:programType/:programName/graph' component={Graph}/>
       <Route path='/:programType/:programName/diagram' component={Diagram}/>
-      <Route path='/:programType/:programName/report' component={CpuReport}/>
+      <Route path='/:programType/:programName/report' component={Report}/>
       <Route exact path='/memory' component={Memory}/>
     </Switch>
   </main>

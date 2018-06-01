@@ -4,7 +4,6 @@ import { withStyles } from '@material-ui/core/styles'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 
-const API = 'http://localhost:8080/cpu/report/sort'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -15,16 +14,20 @@ const styles = theme => ({
   }),
 })
 
-class CpuReport extends Component {
+class Report extends Component {
   constructor(props) {
     super(props)
-
+    
     this.state = {
       report: []
     }
   }
-
+  
   componentDidMount() {
+    const { match: { params: { programName, programType } } } = this.props
+    
+    const API = `http://localhost:8080/report/${programType}/${programName}`
+
     fetch(API)
       .then(response => {
         if (response.ok) {
@@ -52,8 +55,8 @@ class CpuReport extends Component {
   }
 }
 
-CpuReport.propTypes = {
+Report.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(CpuReport)
+export default withStyles(styles)(Report)

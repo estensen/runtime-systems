@@ -110,6 +110,10 @@ func createReport(packageName string, profileType string) {
 	}
 	defer file.Close()
 
+	if profileType == "memory" {
+		profileType = "mem"
+	}
+
 	pprofPath := "benchmarks/programs/" + packageName + "/" + profileType + ".pprof"
 
 	pproftext := exec.Command("go", "tool", "pprof", "-text", pprofPath)
