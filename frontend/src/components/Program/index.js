@@ -6,8 +6,6 @@ import Button from '@material-ui/core/Button'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 
-const API = 'http://localhost:8080/cpu/runprofiling/'  // Hardcoded
-const API_checkProfile = 'http://localhost:8080/cpu/checkProfiling/'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -18,30 +16,31 @@ const styles = theme => ({
   }),
 })
 
-class CpuProgram extends Component {
+class Program extends Component {
   constructor(props) {
     super(props)
-
+    
     this.state = {
       isProfiled: false,
     }
   }
-
+  
   componentDidMount() {
-    const { match: { params: { programName } } } = this.props
-    console.log(programName)
-      fetch(API_checkProfile+programName)
-        .then(response => {
-          if (response.ok) {
-            response.json()
-            .then(data => this.setState({ isProfiled: data.profileExists }))
-          }
-        })
+    const { match: { params: { programName, programType } } } = this.props
+    const API= `http://localhost:8080/checkProfiling/${programType}/${programName}`
+    fetch(API)
+    .then(response => {
+      if (response.ok) {
+        response.json()
+        .then(data => this.setState({ isProfiled: data.profileExists }))
+      }
+    })
   }
-
+  
   profile = () => {
-    const { match: { params: { programName } } } = this.props
-    fetch(API + programName)
+    const { match: { params: { programName, programType } } } = this.props
+    const API = `http://localhost:8080/runprofiling/${programType}/${programName}/`  // Hardcoded
+    fetch(API)
       .then(response => {
         if (response.ok) {
           response.json()
@@ -52,7 +51,7 @@ class CpuProgram extends Component {
 
   render() {
     const { isProfiled } = this.state
-    const { match: { params: { programName } } } = this.props
+    const { match: { params: { programName, programType } } } = this.props
     const { classes } = this.props
 
     const profileOptions = isProfiled
@@ -73,7 +72,7 @@ class CpuProgram extends Component {
       <div>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h1">
-            CPU {programName}
+            {programType} {programName}
           </Typography>
           <Button variant="outlined" size="small" className={classes.button} onClick={this.profile}>
             Run Profiling
@@ -86,8 +85,8 @@ class CpuProgram extends Component {
   }
 
 
-CpuProgram.propTypes = {
+Program.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(CpuProgram)
+export default withStyles(styles)(Program)

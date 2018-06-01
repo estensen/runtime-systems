@@ -12,13 +12,18 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 )
 
-func Profiler(packageName string, profilingRunning chan bool) {
-	runPackage(packageName, profilingRunning)
+func Profiler(packageName string, pType string, profilingRunning chan bool) {
+	runPackage(packageName, pType, profilingRunning)
 }
 
-func runPackage(packageName string, profilingRunning chan bool) {
+func runPackage(packageName string, pType string, profilingRunning chan bool) {
 	defer profilingIsRunning(profilingRunning)
-	defer profile.Start(profile.CPUProfile, profile.ProfilePath("./benchmarks/programs/"+packageName)).Stop()
+	profileType := profile.MemProfile
+	if pType == "cpu" {
+		profileType = profile.CPUProfile
+	}
+
+	defer profile.Start(profileType, profile.ProfilePath("./benchmarks/programs/"+packageName)).Stop()
 	switch packageName {
 	case "sort":
 		sort.Sort()

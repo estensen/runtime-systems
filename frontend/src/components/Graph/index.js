@@ -28,7 +28,7 @@ const chart = {
   }]
 }
 
-class CpuGraph extends Component {
+class Graph extends Component {
   constructor(props) {
     super(props)
 
@@ -57,7 +57,7 @@ class CpuGraph extends Component {
   }
 
   render() {
-    const { match: { params: { programName } } } = this.props
+    const { match: { params: { programName, programType } } } = this.props
     const { classes } = this.props
     const { chartData } = this.state
 
@@ -65,7 +65,7 @@ class CpuGraph extends Component {
       <div>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h1">
-            {programName} % CPU usage
+            {programName} % {programType} usage
           </Typography>
           <Typography component="div">
             <LineChart data={chartData} width="600" height="250"/>
@@ -76,8 +76,8 @@ class CpuGraph extends Component {
   }
 }
 
-CpuGraph.propTypes = {
+Graph.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(CpuGraph)
+export default withStyles(styles)(Graph)

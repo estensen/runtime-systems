@@ -5,7 +5,6 @@ import { withStyles } from '@material-ui/core/styles'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 
-const API = 'http://localhost:8080/cpu'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -16,32 +15,36 @@ const styles = theme => ({
   }),
 })
 
-class Cpu extends Component {
+class ProgramType extends Component {
   constructor(props) {
     super(props)
-
+    
     this.state = {
       programs: [],
     }
   }
-
+  
   componentDidMount() {
-    fetch(API)
-      .then(response => {
-        if (response.ok) {
-          response.json()
-          .then(data => this.setState({ programs: [...data.programs] }))
-        }
-      })
-  }
+    const { match: { params: { programType } } } = this.props
+    const API = `http://localhost:8080/programs/${programType}`
 
+    fetch(API)
+    .then(response => {
+      if (response.ok) {
+        response.json()
+        .then(data => this.setState({ programs: [...data.programs] }))
+      }
+    })
+  }
+  
   render() {
+    const { match: { params: { programType } } } = this.props
     const { classes } = this.props
     const { programs } = this.state
     const listPrograms = (programs.length > 1)
       ? programs.map(program =>
         <div key={program}>
-          <Link to={`cpu/${program}`}>{program}</Link>
+          <Link to={`${programType}/${program}`}>{program}</Link>
         </div>)
       : <li>No files</li>
 
@@ -49,7 +52,7 @@ class Cpu extends Component {
     <div>
       <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h1">
-            CPU
+            {programType}
           </Typography>
           <Typography component="div">
             {listPrograms}
@@ -60,8 +63,8 @@ class Cpu extends Component {
   }
 }
 
-Cpu.propTypes = {
+ProgramType.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(Cpu)
+export default withStyles(styles)(ProgramType)

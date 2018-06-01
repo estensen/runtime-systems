@@ -4,7 +4,6 @@ import { withStyles } from '@material-ui/core/styles'
 import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 
-const API = 'http://localhost:8080/cpu/diagram/'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -15,10 +14,11 @@ const styles = theme => ({
   }),
 })
 
-class CpuDiagram extends Component {
+class Diagram extends Component {
   render() {
-    const { match: { params: { programName } } } = this.props
+    const { match: { params: { programName, programType } } } = this.props
     const { classes } = this.props
+    const API = `http://localhost:8080/diagram/${programType}/${programName}`
 
     return (
       <div>
@@ -27,7 +27,7 @@ class CpuDiagram extends Component {
             {programName} diagram
           </Typography>
           <Typography component="div">
-            <img src={API + programName} width={1400} alt="Program diagram"/>
+            <img src={API} width={1400} alt="Program diagram"/>
           </Typography>
         </Paper>
       </div>
@@ -36,8 +36,8 @@ class CpuDiagram extends Component {
 }
 
 
-CpuDiagram.propTypes = {
+Diagram.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(CpuDiagram)
+export default withStyles(styles)(Diagram)
