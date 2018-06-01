@@ -48,10 +48,51 @@ func getPrograms(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func deleteOldProfile(program string, profileType string) {
-	filepath := "benchmarks/programs/" + program + "/" + profileType + ".pprof"
-	_, err := os.Open(filepath)
+	programPath := "benchmarks/programs/" + program + "/"
+	pprofPath := programPath + profileType + ".pprof"
+
+	//delete pprof
+	_, err := os.Open(pprofPath)
 	if err == nil {
-		os.Remove(filepath)
+		os.Remove(pprofPath)
+	}
+
+	//delete diagrams
+	diagramPath := "/diagrams"
+	emptyFolder(diagramPath, program, profileType, ".png")
+
+	//delete reports
+	reportPath := "/reports"
+	emptyFolder(reportPath, program, profileType, ".txt")
+
+}
+
+func emptyFolder(dir string, program string, profileType string, format string) {
+	directory, err := os.Open(dir)
+	if err == nil {
+		panic("unable to Open " + dir)
+	}
+
+	dirFiles, err := directory.Readdir(-1)
+	if err == nil {
+		panic("unable to read dirfiles ")
+	}
+	fmt.Print(dirFiles)
+
+	for index := range dirFiles {
+		file := dirFiles[index]
+		name := file.Name()
+
+		programName := program + "_" + profileType + format
+		fmt.Println(name)
+		fmt.Println(programName)
+
+		if name == programName {
+			fullpath := dir + name
+
+			os.Remove(fullpath)
+			fmt.Println("Deleted " + fullpath)
+		}
 	}
 }
 
@@ -171,6 +212,10 @@ func getDiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 			panic("Could not create " + filename)
 		}
 		defer diagram.Close()
+
+		if profileType == "memory" {
+			profileType = "mem"
+		}
 
 		//run command to create text from pprof
 		pprofPath := "benchmarks/programs/" + packageName + "/" + profileType + ".pprof"
