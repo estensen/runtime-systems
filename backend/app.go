@@ -58,26 +58,29 @@ func deleteOldProfile(program string, profileType string) {
 	}
 
 	//delete diagrams
-	diagramPath := "/diagrams"
+	diagramPath := "diagrams"
 	emptyFolder(diagramPath, program, profileType, ".png")
 
 	//delete reports
-	reportPath := "/reports"
+	reportPath := "reports"
 	emptyFolder(reportPath, program, profileType, ".txt")
 
 }
 
 func emptyFolder(dir string, program string, profileType string, format string) {
 	directory, err := os.Open(dir)
-	if err == nil {
+	if err != nil {
 		panic("unable to Open " + dir)
 	}
 
-	dirFiles, err := directory.Readdir(-1)
-	if err == nil {
+	fmt.Println(dir)
+	fmt.Println(directory)
+
+	dirFiles, err := directory.Readdir(0)
+	if err != nil {
 		panic("unable to read dirfiles ")
 	}
-	fmt.Print(dirFiles)
+	fmt.Println(dirFiles)
 
 	for index := range dirFiles {
 		file := dirFiles[index]
@@ -88,7 +91,7 @@ func emptyFolder(dir string, program string, profileType string, format string) 
 		fmt.Println(programName)
 
 		if name == programName {
-			fullpath := dir + name
+			fullpath := dir + "/" + name
 
 			os.Remove(fullpath)
 			fmt.Println("Deleted " + fullpath)
