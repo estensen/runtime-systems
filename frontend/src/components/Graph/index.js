@@ -5,7 +5,6 @@ import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 
 var LineChart = require("react-chartjs").Line
-const API = 'http://localhost:8080/cpu/graph/sort'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -40,6 +39,8 @@ class Graph extends Component {
   componentDidMount() {
     (async() => {
       try {
+        const { match: { params: { programName, programType } } } = this.props
+        const API = `http://localhost:8080/graph/${programType}/${programName}`
         var response = await fetch(API)
         var data = await response.json()
         this.updateState(data)

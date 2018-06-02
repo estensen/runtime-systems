@@ -73,28 +73,21 @@ func emptyFolder(dir string, program string, profileType string, format string) 
 		panic("unable to Open " + dir)
 	}
 
-	fmt.Println(dir)
-	fmt.Println(directory)
-
 	dirFiles, err := directory.Readdir(0)
 	if err != nil {
 		panic("unable to read dirfiles ")
 	}
-	fmt.Println(dirFiles)
 
 	for index := range dirFiles {
 		file := dirFiles[index]
 		name := file.Name()
 
 		programName := program + "_" + profileType + format
-		fmt.Println(name)
-		fmt.Println(programName)
 
 		if name == programName {
 			fullpath := dir + "/" + name
 
 			os.Remove(fullpath)
-			fmt.Println("Deleted " + fullpath)
 		}
 	}
 }

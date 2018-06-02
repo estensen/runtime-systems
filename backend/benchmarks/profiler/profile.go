@@ -28,10 +28,10 @@ func runPackage(packageName string, pType string, profilingRunning chan bool) {
 	case "sort":
 		sort.Sort()
 	case "fibonacci":
-		fibonacci.Fibonacci(100000000)
+		fibonacci.Fibonacci(10000000000)
 	case "wordSearch":
 		//change WordSearchWithList to WordSearchWithMap to see difference in CPU time
-		wordSearch.WordSearchWithList("brick")
+		wordSearch.WordSearchWithList("boisterous")
 	default:
 		fmt.Println("Package not found")
 	}
@@ -42,7 +42,7 @@ func profilingIsRunning(profilingRunning chan bool) {
 }
 
 func CPUPercent() []string {
-	c, _ := cpu.Percent(45*time.Millisecond, false)
+	c, _ := cpu.Percent(500*time.Millisecond, false)
 	t := time.Now()
 	now := t.Format("15:04:05")
 	line := []string{now, strconv.FormatFloat(c[0], 'f', 2, 64)} // Convert c from float64 to string
