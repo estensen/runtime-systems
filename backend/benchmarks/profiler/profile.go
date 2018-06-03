@@ -12,33 +12,37 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 )
 
-func Profiler(packageName string, profilingDone chan bool) {
-	runPackage(packageName, profilingDone)
+func Profiler(packageName string, pType string, profilingRunning chan bool) {
+	runPackage(packageName, pType, profilingRunning)
 }
 
-func runPackage(packageName string, profilingDone chan bool) {
-	defer profilingIsDone(profilingDone)
-	defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop()
-	fmt.Println(packageName)
+func runPackage(packageName string, pType string, profilingRunning chan bool) {
+	defer profilingIsRunning(profilingRunning)
+	profileType := profile.MemProfile
+	if pType == "cpu" {
+		profileType = profile.CPUProfile
+	}
+
+	defer profile.Start(profileType, profile.ProfilePath("./benchmarks/programs/"+packageName)).Stop()
 	switch packageName {
 	case "sort":
 		sort.Sort()
 	case "fibonacci":
-		fibonacci.Fibonacci(100000000)
+		fibonacci.Fibonacci(10000000000)
 	case "wordSearch":
 		//change WordSearchWithList to WordSearchWithMap to see difference in CPU time
-		wordSearch.WordSearchWithList("brick")
+		wordSearch.WordSearchWithList("boisterous")
 	default:
 		fmt.Println("Package not found")
 	}
 }
 
-func profilingIsDone(profilingDone chan bool) {
-	profilingDone <- true
+func profilingIsRunning(profilingRunning chan bool) {
+	profilingRunning <- false
 }
 
 func CPUPercent() []string {
-	c, _ := cpu.Percent(45*time.Millisecond, false)
+	c, _ := cpu.Percent(500*time.Millisecond, false)
 	t := time.Now()
 	now := t.Format("15:04:05")
 	line := []string{now, strconv.FormatFloat(c[0], 'f', 2, 64)} // Convert c from float64 to string

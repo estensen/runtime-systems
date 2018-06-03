@@ -5,7 +5,6 @@ import Paper from '@material-ui/core/Paper'
 import Typography from '@material-ui/core/Typography'
 
 var LineChart = require("react-chartjs").Line
-const API = 'http://localhost:8080/cpu/graph/sort'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -28,7 +27,7 @@ const chart = {
   }]
 }
 
-class CpuGraph extends Component {
+class Graph extends Component {
   constructor(props) {
     super(props)
 
@@ -40,6 +39,8 @@ class CpuGraph extends Component {
   componentDidMount() {
     (async() => {
       try {
+        const { match: { params: { programName, programType } } } = this.props
+        const API = `http://localhost:8080/graph/${programType}/${programName}`
         var response = await fetch(API)
         var data = await response.json()
         this.updateState(data)
@@ -57,7 +58,7 @@ class CpuGraph extends Component {
   }
 
   render() {
-    const { match: { params: { programName } } } = this.props
+    const { match: { params: { programName, programType } } } = this.props
     const { classes } = this.props
     const { chartData } = this.state
 
@@ -65,7 +66,7 @@ class CpuGraph extends Component {
       <div>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h1">
-            {programName} % CPU usage
+            {programName} % {programType} usage
           </Typography>
           <Typography component="div">
             <LineChart data={chartData} width="600" height="250"/>
@@ -76,8 +77,8 @@ class CpuGraph extends Component {
   }
 }
 
-CpuGraph.propTypes = {
+Graph.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(CpuGraph)
+export default withStyles(styles)(Graph)

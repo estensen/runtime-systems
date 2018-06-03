@@ -72,7 +72,6 @@ func readTextFile(useMap bool) {
 	} else {
 		for scanner.Scan() {
 			lowerStringWord := stringToAllAlpha(strings.ToLower(scanner.Text()))
-			fmt.Println(lowerStringWord)
 			wordList = append(wordList, lowerStringWord)
 
 		}

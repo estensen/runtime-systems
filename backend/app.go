@@ -14,9 +14,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-var graphPoints = make(map[string][]string)
-var profilingStarted = false
 var profilingDoneChannel = make(chan bool, 1)
+var profilingIsRunning = false
 
 func indexHandler(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	payload := map[string]string{"apiType": "This is a RESTful API"}
@@ -47,39 +46,107 @@ func getPrograms(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func runProfiling(packageName string) {
-	profilingisDone := false
+func deleteOldProfile(program string, profileType string) {
+	programPath := "benchmarks/programs/" + program + "/"
+	pprofPath := programPath + profileType + ".pprof"
 
-	if !profilingStarted {
-		profilingStarted = true
+	//delete pprof
+	_, err := os.Open(pprofPath)
+	if err == nil {
+		os.Remove(pprofPath)
+	}
+
+	//delete diagrams
+	diagramPath := "diagrams"
+	emptyFolder(diagramPath, program, profileType, ".png")
+
+	//delete reports
+	reportPath := "reports"
+	emptyFolder(reportPath, program, profileType, ".txt")
+
+	//delete graphs
+	graphsPath := "graphs"
+	emptyFolder(graphsPath, program, profileType, ".json")
+
+}
+
+func emptyFolder(dir string, program string, profileType string, format string) {
+	directory, err := os.Open(dir)
+	if err != nil {
+		panic("unable to Open " + dir)
+	}
+
+	dirFiles, err := directory.Readdir(0)
+	if err != nil {
+		panic("unable to read dirfiles ")
+	}
+
+	for index := range dirFiles {
+		file := dirFiles[index]
+		name := file.Name()
+
+		programName := program + "_" + profileType + format
+
+		if name == programName {
+			fullpath := dir + "/" + name
+
+			os.Remove(fullpath)
+		}
+	}
+}
+
+func runProfiling(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	packageName := ps.ByName("program")
+	profileType := ps.ByName("profileType")
+	var graphPoints = make(map[string][]string)
+	if !profilingIsRunning {
+		profilingIsRunning = true
+		deleteOldProfile(packageName, profileType)
 		go func() {
-			profiler.Profiler(packageName, profilingDoneChannel)
+			profiler.Profiler(packageName, profileType, profilingDoneChannel)
 		}()
 
-		for !profilingisDone {
+		for profilingIsRunning {
 			cpuStats := profiler.CPUPercent()
 			graphPoints["Time"] = append(graphPoints["Time"], cpuStats[0])
 			graphPoints["Percent"] = append(graphPoints["Percent"], cpuStats[1])
 
 			timer := time.NewTimer(50 * time.Millisecond)
 			<-timer.C
-			profilingisDone = checkIfProfilingisDone()
+			profilingIsRunning = checkIfProfilingisDone()
 		}
 	}
+	createGraph(packageName, profileType, graphPoints)
+	payload := map[string]bool{"isProfiled": true} // Hardcoded
+	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func checkIfPprofFileExists() bool {
-	if _, err := os.Stat("cpu.pprof"); os.IsNotExist(err) {
-		return false
+func createGraph(packageName string, profileType string, graphPoints map[string][]string) {
+	file, err := os.Create("graphs/" + packageName + "_" + profileType + ".json")
+	if err != nil {
+		panic("Could not create textfile" + packageName)
 	}
-	return true
+	defer file.Close()
+	jsongraph, err := json.Marshal(graphPoints)
+	if err != nil {
+		panic("could not convert graphmap to json")
+	}
+	file.Write(jsongraph)
 }
 
-func checkIfDiagramExists(packageName string) bool {
-	if _, err := os.Stat("./diagrams/" + packageName); os.IsNotExist(err) {
-		return false
+func checkIfPprofFileExists(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	packageName := ps.ByName("program")
+	profileType := ps.ByName("profileType")
+	if profileType == "memory" {
+		profileType = "mem"
 	}
-	return true
+
+	payload := map[string]bool{"profileExists": true}
+	pprofPath := "benchmarks/programs/" + packageName + "/" + profileType + ".pprof"
+	if _, err := os.Stat(pprofPath); os.IsNotExist(err) {
+		payload["profileExists"] = false
+	}
+	respondWithJSON(w, http.StatusOK, payload)
 }
 
 func checkIfReportExists(packageName string) bool {
@@ -89,14 +156,20 @@ func checkIfReportExists(packageName string) bool {
 	return true
 }
 
-func createReport(filename string) {
-	file, err := os.Create("reports/" + filename)
+func createReport(packageName string, profileType string) {
+	file, err := os.Create("reports/" + packageName + "_" + profileType + ".txt")
 	if err != nil {
-		panic("Could not create " + filename)
+		panic("Could not create textfile" + packageName)
 	}
 	defer file.Close()
 
-	pproftext := exec.Command("go", "tool", "pprof", "-text", "cpu.pprof")
+	if profileType == "memory" {
+		profileType = "mem"
+	}
+
+	pprofPath := "benchmarks/programs/" + packageName + "/" + profileType + ".pprof"
+
+	pproftext := exec.Command("go", "tool", "pprof", "-text", pprofPath)
 	reportText, err := pproftext.Output()
 	if err != nil {
 		panic(err)
@@ -117,15 +190,13 @@ func readReport(filename string) string {
 }
 
 // Read file and return file length
-func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func getReport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("program")
-	filename := packageName + ".txt"
+	profileType := ps.ByName("profileType")
+	filename := packageName + "_" + profileType + ".txt"
 
-	if !checkIfPprofFileExists() {
-		runProfiling(packageName)
-	}
 	if !checkIfReportExists(filename) {
-		createReport(filename)
+		createReport(packageName, profileType)
 	}
 
 	reportStr := readReport(filename)
@@ -135,13 +206,10 @@ func getCPUreport(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 
 // This method will run our profiler with the given package name
 // then create a PDF diagram with the given cpu.pprof file and show this on the webpage.
-func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func getDiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("program")
-	filename := packageName + ".png"
-
-	if !checkIfPprofFileExists() {
-		runProfiling(packageName)
-	}
+	profileType := ps.ByName("profileType")
+	filename := packageName + "_" + profileType + ".png"
 
 	if checkIfDiagramExists(filename) {
 		diagram, err := ioutil.ReadFile("diagrams/" + filename)
@@ -157,8 +225,13 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 		}
 		defer diagram.Close()
 
+		if profileType == "memory" {
+			profileType = "mem"
+		}
+
 		//run command to create text from pprof
-		pprofPNG := exec.Command("go", "tool", "pprof", "-png", "cpu.pprof")
+		pprofPath := "benchmarks/programs/" + packageName + "/" + profileType + ".pprof"
+		pprofPNG := exec.Command("go", "tool", "pprof", "-png", pprofPath)
 		png, err := pprofPNG.Output()
 		if err != nil {
 			panic(err)
@@ -169,12 +242,36 @@ func getCPUdiagram(w http.ResponseWriter, r *http.Request, ps httprouter.Params)
 	}
 }
 
+func checkIfDiagramExists(packageName string) bool {
+	if _, err := os.Stat("./diagrams/" + packageName); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
 func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("program")
-	if !checkIfPprofFileExists() {
-		runProfiling(packageName)
+	profileType := ps.ByName("profileType")
+	filename := packageName + "_" + profileType + ".json"
+
+	graph, err := ioutil.ReadFile("graphs/" + filename)
+	if err != nil {
+		panic("Could not open " + filename)
 	}
-	respondWithJSON(w, http.StatusOK, graphPoints)
+
+	type graphpoint struct {
+		Percent []string
+		Time    []string
+	}
+
+	var g graphpoint
+
+	error := json.Unmarshal(graph, &g)
+	if error != nil {
+		panic("Could not open " + filename)
+	}
+
+	respondWithJSON(w, http.StatusOK, g)
 }
 
 func checkIfProfilingisDone() bool {
@@ -183,7 +280,7 @@ func checkIfProfilingisDone() bool {
 		fmt.Println("profiling is Done")
 		return done
 	default:
-		return false
+		return true
 	}
 }
 
@@ -215,10 +312,12 @@ func enableCors(w *http.ResponseWriter) {
 func main() {
 	router := httprouter.New()
 	router.GET("/", indexHandler)
-	router.GET("/cpu", getPrograms)
-	router.GET("/cpu/report/:program", getCPUreport)
-	router.GET("/cpu/diagram/:program", getCPUdiagram)
-	router.GET("/cpu/graph/:program", getGraphData)
+	router.GET("/programs/:profileType", getPrograms)
+	router.GET("/checkProfiling/:profileType/:program", checkIfPprofFileExists)
+	router.GET("/report/:profileType/:program", getReport)
+	router.GET("/diagram/:profileType/:program", getDiagram)
+	router.GET("/graph/:profileType/:program", getGraphData)
+	router.GET("/runprofiling/:profileType/:program", runProfiling)
 
 	env := os.Getenv("APP_ENV")
 	if env == "production" {
