@@ -14,7 +14,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-var graphPoints = make(map[string][]string)
 var profilingDoneChannel = make(chan bool, 1)
 var profilingIsRunning = false
 
@@ -65,6 +64,10 @@ func deleteOldProfile(program string, profileType string) {
 	reportPath := "reports"
 	emptyFolder(reportPath, program, profileType, ".txt")
 
+	//delete graphs
+	graphsPath := "graphs"
+	emptyFolder(graphsPath, program, profileType, ".json")
+
 }
 
 func emptyFolder(dir string, program string, profileType string, format string) {
@@ -95,7 +98,7 @@ func emptyFolder(dir string, program string, profileType string, format string) 
 func runProfiling(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	packageName := ps.ByName("program")
 	profileType := ps.ByName("profileType")
-
+	var graphPoints = make(map[string][]string)
 	if !profilingIsRunning {
 		profilingIsRunning = true
 		deleteOldProfile(packageName, profileType)
@@ -113,8 +116,22 @@ func runProfiling(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 			profilingIsRunning = checkIfProfilingisDone()
 		}
 	}
+	createGraph(packageName, profileType, graphPoints)
 	payload := map[string]bool{"isProfiled": true} // Hardcoded
 	respondWithJSON(w, http.StatusOK, payload)
+}
+
+func createGraph(packageName string, profileType string, graphPoints map[string][]string) {
+	file, err := os.Create("graphs/" + packageName + "_" + profileType + ".json")
+	if err != nil {
+		panic("Could not create textfile" + packageName)
+	}
+	defer file.Close()
+	jsongraph, err := json.Marshal(graphPoints)
+	if err != nil {
+		panic("could not convert graphmap to json")
+	}
+	file.Write(jsongraph)
 }
 
 func checkIfPprofFileExists(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -126,7 +143,6 @@ func checkIfPprofFileExists(w http.ResponseWriter, r *http.Request, ps httproute
 
 	payload := map[string]bool{"profileExists": true}
 	pprofPath := "benchmarks/programs/" + packageName + "/" + profileType + ".pprof"
-	fmt.Println(pprofPath)
 	if _, err := os.Stat(pprofPath); os.IsNotExist(err) {
 		payload["profileExists"] = false
 	}
@@ -234,7 +250,28 @@ func checkIfDiagramExists(packageName string) bool {
 }
 
 func getGraphData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	respondWithJSON(w, http.StatusOK, graphPoints)
+	packageName := ps.ByName("program")
+	profileType := ps.ByName("profileType")
+	filename := packageName + "_" + profileType + ".json"
+
+	graph, err := ioutil.ReadFile("graphs/" + filename)
+	if err != nil {
+		panic("Could not open " + filename)
+	}
+
+	type graphpoint struct {
+		Percent []string
+		Time    []string
+	}
+
+	var g graphpoint
+
+	error := json.Unmarshal(graph, &g)
+	if error != nil {
+		panic("Could not open " + filename)
+	}
+
+	respondWithJSON(w, http.StatusOK, g)
 }
 
 func checkIfProfilingisDone() bool {
