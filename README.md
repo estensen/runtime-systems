@@ -4,15 +4,18 @@
 The project requires go, docker and docker-compose.
 
 ## Run
-Start the app by running:
+Start backend
 ```
-$ export APP_ENV=dev
-$ docker-compose up -d
+$ cd backend
+$ go get ./...
+$ go run app.go
 ```
 
-Stop by running
+Start frontend
 ```
-$ docker-compose stop
+$ cd frontend
+$ npm install
+$ npm start
 ```
 
 ## Project Description
