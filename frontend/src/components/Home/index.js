@@ -21,11 +21,30 @@ class Home extends Component {
       <div>
         <Paper className={classes.root} elevation={4}>
           <Typography variant="headline" component="h3">
-            Home
+            Instructions:
           </Typography>
-          <Typography component="p">
-            Add instructions on how to use the app here
-          </Typography>
+        
+            <ol>
+              <li style={{margin: 10 + 'px'}}>
+                Choose between profiling the CPU and the Memory, by following the navigation bar
+              </li>
+              <li style={{margin: 10 + 'px'}}>
+                After navigating to one of the types, you get a list of the programs available for profiling
+              </li>
+              <li style={{margin: 10 + 'px'}}>
+                Select which program you want to profile
+              </li>
+              <li style={{margin: 10 + 'px'}}>
+                Click on the "run profiling" button to profile
+              </li>
+                If it exists a profile for the selected program, you will have options for visualizing the last profile. If not, 
+                you need to run profiling first.
+                
+              <li style={{margin: 10 + 'px'}}>
+                Then select how you want to see the profiling. Current options: Diagram, Graph and Report
+              </li>
+            </ol>
+         
         </Paper>
       </div>
     )
